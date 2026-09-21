@@ -1,0 +1,12 @@
+# Reaproveita um túnel que já está rodando: o web entra na rede Docker desse túnel.
+# No painel do túnel, adicione um Public Hostname com serviço http://estudo-web:80
+services:
+  web:
+    networks:
+      - default
+      - tunnel
+
+networks:
+  tunnel:
+    name: ${TUNNEL_NETWORK}
+    external: true

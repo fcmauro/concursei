@@ -1,0 +1,10 @@
+# Túnel Cloudflare próprio. No painel, aponte o hostname para http://web:80
+services:
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: estudo-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    depends_on:
+      web:
+        condition: service_healthy

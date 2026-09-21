@@ -8,13 +8,24 @@ BASE="${DEPLOY_BASE:-$HOME/concursei}"
 REL="$BASE/releases/$SHA"
 KEEP=3
 
-[ -f "$BASE/.env" ] || { echo "ERRO: falta $BASE/.env (precisa de TUNNEL_TOKEN=...)"; exit 1; }
+[ -f "$BASE/.env" ] || { echo "ERRO: falta $BASE/.env (precisa de TUNNEL_TOKEN=... ou TUNNEL_NETWORK=...)"; exit 1; }
 [ -d "$REL" ] || { echo "ERRO: release $REL não existe"; exit 1; }
 
 PREV="$(readlink -f "$BASE/current" 2>/dev/null || true)"
 
+has_var() { grep -Eq "^$1=.+" "$BASE/.env"; }
+
+if has_var TUNNEL_TOKEN; then
+  TUNNEL_FILE="docker-compose.tunnel.yml"
+elif has_var TUNNEL_NETWORK; then
+  TUNNEL_FILE="docker-compose.shared-tunnel.yml"
+else
+  echo "ERRO: defina TUNNEL_TOKEN (túnel próprio) ou TUNNEL_NETWORK (túnel existente) em $BASE/.env"
+  exit 1
+fi
+
 compose_up() {
-  (cd "$1" && docker compose -p concursei --env-file "$BASE/.env" -f docker-compose.vps.yml up -d --build --remove-orphans)
+  (cd "$1" && docker compose -p concursei --env-file "$BASE/.env" -f docker-compose.vps.yml -f "$TUNNEL_FILE" up -d --build --remove-orphans)
 }
 
 point_current() {

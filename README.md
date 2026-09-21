@@ -59,16 +59,24 @@ teste de fumaça com Docker) e, se passar, envia a release por SSH. **O build é
 própria VPS** (funciona em ARM), com health check e **rollback automático** se a nova
 versão não ficar saudável. Antes de cada deploy é feito um backup do banco.
 
-O acesso público é pelo túnel Cloudflare (`docker-compose.vps.yml`): nenhuma porta do app
-fica aberta no host.
+O acesso público é por um túnel Cloudflare: nenhuma porta do app fica aberta no host.
+Você pode usar um **túnel próprio** ou **reaproveitar um túnel que já roda** na VPS.
 
 ### Configuração única
 
-1. **Túnel:** no Cloudflare Zero Trust crie um túnel, copie o token e adicione um
-   *public hostname* apontando para `http://web:80`.
-2. **Na VPS**, crie `~/concursei/.env`:
+1. **Túnel** (escolha um):
+   - **Reaproveitar um túnel existente** (túneis gerenciados pelo painel Zero Trust):
+     descubra a rede Docker dele com
+     `docker inspect <container-do-tunel> --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'`
+     (precisa ser uma rede criada por compose, não a `bridge` padrão). No painel do túnel
+     (Networks → Tunnels → o túnel → Public Hostname) adicione o hostname com serviço
+     `http://estudo-web:80`. Prefira um túnel de um app menos sensível: o `web` entra na
+     rede desse túnel.
+   - **Túnel novo:** crie um túnel, copie o token e adicione o hostname com serviço `http://web:80`.
+2. **Na VPS**, crie `~/concursei/.env` (use `TUNNEL_NETWORK` **ou** `TUNNEL_TOKEN`):
    ```
-   TUNNEL_TOKEN=<token do túnel>
+   TUNNEL_NETWORK=<rede do túnel existente>   # reaproveitando um túnel
+   # TUNNEL_TOKEN=<token do túnel>            # ou: túnel novo (sobe o cloudflared junto)
    ALLOW_REGISTRATION=true     # deixe true só até criar sua conta; depois troque para false
    # JWT_SECRET=...            # opcional (senão é gerado e guardado no volume)
    # CORS_ORIGIN=https://seu.dominio

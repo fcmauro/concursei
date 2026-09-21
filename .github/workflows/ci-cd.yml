@@ -107,7 +107,7 @@ jobs:
         run: |
           SHA="${GITHUB_SHA::12}"
           PORT="${VPS_PORT:-22}"
-          git archive --format=tar.gz -o release.tgz HEAD api web docker-compose.vps.yml scripts
+          git archive --format=tar.gz -o release.tgz HEAD api web docker-compose.vps.yml docker-compose.tunnel.yml docker-compose.shared-tunnel.yml scripts
           scp -i ~/.ssh/deploy_key -P "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes release.tgz "$VPS_USER@$VPS_HOST:/tmp/concursei-$SHA.tgz"
       - name: Publicar (build na VPS, health check e rollback automático)
         run: |
