@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  ::selection { background: rgba(108,92,231,0.25); }
+  :focus { outline: none; }
+  :focus-visible { outline: 3px solid #6C5CE7; outline-offset: 2px; }
+  ::-webkit-scrollbar { height: 10px; width: 10px; }
+  ::-webkit-scrollbar-thumb { background: #E2E4F5; border-radius: 6px; }
+  a { color: #6C5CE7; text-decoration: none; }
+  a:hover { color: #5646C4; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#F6F7FC;color:#1F2333;font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.55;">
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 20% 15%,#EDE9FF 0%,#F6F7FC 55%);">
+    <form onSubmit="{{ doLogin }}" style="width:min(400px,100%);display:flex;flex-direction:column;gap:16px;background:#fff;border-radius:24px;padding:32px;box-shadow:0 20px 50px rgba(108,92,231,0.18);">
+      <div>
+        <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#6C5CE7,#4D96FF);display:grid;place-items:center;margin-bottom:14px;box-shadow:0 8px 20px rgba(108,92,231,0.35);">
+          <i class="ph-fill ph-trophy" style="color:#fff;font-size:26px;"></i>
+        </div>
+        <h1 style="margin:0 0 6px;font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;color:#1F2333;">Cronograma de Estudos</h1>
+        <p style="margin:0;font-size:13px;color:#6B7093;">Edital, diário de revisão espaçada e distribuição de horas — para qualquer concurso</p>
+      </div>
+
+      <div style="display:inline-flex;background:#F0F1F9;border-radius:14px;padding:4px;">
+        <button type="button" onClick="{{ setLoginMode }}" style="{{ tabLoginStyle }}">Entrar</button>
+        <button type="button" onClick="{{ setRegisterMode }}" style="{{ tabRegisterStyle }}">Criar conta</button>
+      </div>
+
+      <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+        <label>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:#4B4F6B;">Nome</div>
+          <input value="{{ nameVal }}" onChange="{{ onNameChange }}" style="width:100%;min-height:44px;padding:8px 14px;font-size:14px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:12px;" />
+        </label>
+      </sc-if>
+
+      <label>
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:#4B4F6B;">E-mail</div>
+        <input type="email" value="{{ emailVal }}" onChange="{{ onEmailChange }}" style="width:100%;min-height:44px;padding:8px 14px;font-size:14px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:12px;" />
+      </label>
+      <label>
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:#4B4F6B;">Senha</div>
+        <input type="password" value="{{ passVal }}" onChange="{{ onPassChange }}" style="width:100%;min-height:44px;padding:8px 14px;font-size:14px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:12px;" />
+      </label>
+
+      <button type="submit" style="width:100%;margin-top:4px;color:#fff;border:none;background:linear-gradient(135deg,#6C5CE7,#4D96FF);border-radius:12px;padding:13px;font-size:15px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;box-shadow:0 10px 24px rgba(108,92,231,0.35);" style-hover="filter:brightness(1.06)" style-active="filter:brightness(0.95)">{{ submitLabel }}</button>
+
+      <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font-size:12px;color:#8388A8;">Ao criar a conta, você escolhe o edital do seu concurso e o cronograma já vem pronto.</p>
+      </sc-if>
+    </form>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+  <div>
+    <div style="display:flex;align-items:center;gap:16px;padding:14px 24px;background:#fff;box-shadow:0 2px 10px rgba(31,35,51,0.06);flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:10px;margin-right:auto;">
+        <div style="width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#6C5CE7,#4D96FF);display:grid;place-items:center;">
+          <i class="ph-fill ph-trophy" style="color:#fff;font-size:18px;"></i>
+        </div>
+        <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:17px;">Cronograma de Estudos</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:6px;background:#FFF4E5;color:#E8590C;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;">
+        <i class="ph-fill ph-flame" style="font-size:16px;"></i>{{ streakLabel }}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#EDE9FF;color:#6C5CE7;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;">
+        <i class="ph-fill ph-star" style="font-size:16px;"></i>{{ xpLabel }}<span style="opacity:0.6;font-weight:600;">· nível {{ levelLabel }}</span>
+      </div>
+
+      <nav style="display:flex;gap:4px;background:#F0F1F9;border-radius:12px;padding:4px;">
+        <button onClick="{{ goBoard }}" style="{{ navBoardStyle }}"><i class="ph ph-kanban" style="margin-right:6px;"></i>Diário</button>
+        <button onClick="{{ goEdital }}" style="{{ navEditalStyle }}"><i class="ph ph-list-checks" style="margin-right:6px;"></i>Edital</button>
+        <button onClick="{{ goStats }}" style="{{ navStatsStyle }}"><i class="ph ph-chart-bar" style="margin-right:6px;"></i>Horas</button>
+        <button onClick="{{ goTechniques }}" style="{{ navTechniquesStyle }}"><i class="ph ph-lightbulb" style="margin-right:6px;"></i>Técnicas</button>
+      </nav>
+      <button onClick="{{ logout }}" style="color:#8388A8;padding:8px 10px;background:transparent;border:none;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;border-radius:10px;" style-hover="background:#F0F1F9"><i class="ph ph-sign-out" style="margin-right:4px;"></i>Sair</button>
+    </div>
+
+    <div style="padding:24px;max-width:1440px;">
+
+      <sc-if value="{{ isBoard }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+            <button onClick="{{ prevWeek }}" style="{{ navArrowStyle }}"><i class="ph ph-caret-left"></i></button>
+            <strong style="font-size:16px;font-weight:700;font-family:'Poppins',sans-serif;">{{ weekLabel }}</strong>
+            <button onClick="{{ nextWeek }}" style="{{ navArrowStyle }}"><i class="ph ph-caret-right"></i></button>
+            <button onClick="{{ thisWeek }}" style="{{ pillBtnStyle }}">Hoje</button>
+          </div>
+
+          <div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;">
+            <sc-for list="{{ days }}" as="day" hint-placeholder-count="7">
+              <div style="{{ day.colStyle }}">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
+                  <div style="font-size:14px;font-weight:700;font-family:'Poppins',sans-serif;">{{ day.name }}</div>
+                  <div style="font-size:11px;color:#9296B4;">{{ day.dateLabel }}</div>
+                </div>
+                <div style="font-size:11px;color:#9296B4;margin-bottom:10px;font-weight:600;">{{ day.totalHoursLabel }}</div>
+
+                <div style="display:flex;flex-direction:column;gap:10px;flex:1;min-height:20px;">
+                  <sc-for list="{{ day.sessions }}" as="s" hint-placeholder-count="1">
+                    <div style="{{ s.cardStyle }}">
+                      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                        <i class="{{ s.subjectIconClass }}" style="{{ s.subjectIconInlineStyle }}"></i>
+                        <span style="{{ s.typeTagStyle }}">{{ s.typeLabel }}</span>
+                      </div>
+                      <div style="font-size:13px;font-weight:700;">{{ s.subjectName }}</div>
+                      <sc-if value="{{ s.hasTopic }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:12px;color:#6B7093;margin-top:2px;">{{ s.topicName }}</div>
+                      </sc-if>
+
+                      <sc-if value="{{ s.isDone }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:12px;color:#2EA95C;margin-top:6px;font-weight:700;"><i class="ph-fill ph-check-circle"></i> {{ s.resultLabel }}</div>
+                      </sc-if>
+
+                      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+                        <sc-if value="{{ s.canDone }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ s.toggleExpand }}" style="{{ miniBtnStyle }}">Concluir</button>
+                        </sc-if>
+                        <sc-if value="{{ s.canPostpone }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ s.postpone }}" style="{{ miniBtnSecondaryStyle }}">Adiar</button>
+                        </sc-if>
+                        <button onClick="{{ s.remove }}" style="margin-left:auto;color:#B7BACC;background:transparent;border:none;font-size:14px;cursor:pointer;padding:4px;" aria-label="Remover"><i class="ph ph-x"></i></button>
+                      </div>
+
+                      <sc-if value="{{ s.expanded }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:8px;border-top:2px dashed #EAEBF6;">
+                          <label style="font-size:11px;font-weight:600;color:#6B7093;">Questões
+                            <input type="number" min="0" value="{{ s.draftQuestions }}" onChange="{{ s.onDraftQChange }}" style="width:100%;min-height:34px;margin-top:3px;padding:4px 10px;font-size:13px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:10px;" />
+                          </label>
+                          <label style="font-size:11px;font-weight:600;color:#6B7093;">Acertos
+                            <input type="number" min="0" value="{{ s.draftCorrect }}" onChange="{{ s.onDraftCChange }}" style="width:100%;min-height:34px;margin-top:3px;padding:4px 10px;font-size:13px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:10px;" />
+                          </label>
+                          <button onClick="{{ s.save }}" style="color:#fff;border:none;background:linear-gradient(135deg,#6C5CE7,#4D96FF);border-radius:10px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;">Salvar e concluir <i class="ph-fill ph-star" style="margin-left:4px;"></i></button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <button onClick="{{ day.openAdd }}" style="margin-top:10px;border:2px dashed #D6D9EE;color:#8388A8;background:transparent;border-radius:12px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;" style-hover="background:#F0F1F9;border-color:#6C5CE7;color:#6C5CE7;">+ adicionar</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isEdital }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <p style="font-size:13px;color:#8388A8;margin:0;">Quantidade de questões e acertos vêm automaticamente do Diário de estudo.</p>
+          <sc-for list="{{ subjects }}" as="subj" hint-placeholder-count="4">
+            <div style="background:#fff;border-radius:20px;padding:18px 20px;box-shadow:0 4px 18px rgba(31,35,51,0.06);border-top:5px solid {{ subj.color }};">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+                <div style="{{ subj.iconBadgeStyle }}"><i class="{{ subj.iconClass }}" style="color:#fff;font-size:18px;"></i></div>
+                <h3 style="margin:0;font-size:18px;font-weight:700;font-family:'Poppins',sans-serif;flex:1;min-width:160px;">{{ subj.name }}</h3>
+                <span style="{{ subj.weightTagStyle }}">peso {{ subj.weight }}</span>
+                <div style="flex:1;min-width:120px;height:8px;border-radius:6px;background:#F0F1F9;overflow:hidden;max-width:160px;">
+                  <div style="{{ subj.progressFillStyle }}"></div>
+                </div>
+                <span style="font-size:12px;font-weight:700;color:#6B7093;min-width:32px;">{{ subj.progressLabel }}</span>
+              </div>
+              <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:8px 8px;">Assunto</th>
+                    <th style="text-align:left;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:8px 8px;">Teoria</th>
+                    <th style="text-align:left;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:8px 8px;">Questões</th>
+                    <th style="text-align:left;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:8px 8px;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ subj.topics }}" as="t" hint-placeholder-count="3">
+                    <tr style="border-top:1px solid #F0F1F9;">
+                      <td style="padding:9px 8px;">{{ t.name }}</td>
+                      <td style="padding:9px 8px;"><span style="{{ t.theoryTagStyle }}">{{ t.theoryLabel }}</span></td>
+                      <td style="padding:9px 8px;color:#8388A8;">{{ t.questionsLabel }}</td>
+                      <td style="padding:9px 8px;"><span style="{{ t.statusTagStyle }}">{{ t.statusLabel }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStats }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <h2 style="margin:0 0 4px;font-size:26px;font-weight:700;font-family:'Poppins',sans-serif;">Distribuição de horas por matéria</h2>
+          <p style="font-size:13px;color:#8388A8;margin:0 0 18px;">18h/semana previstas — peso maior aparece mais vezes no rodízio.</p>
+          <div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-radius:18px;background:linear-gradient(135deg,#6C5CE7,#4D96FF);color:#fff;min-width:180px;flex:1;box-shadow:0 10px 24px rgba(108,92,231,0.3);">
+              <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.85;font-weight:700;">Previstas / semana</div>
+              <div style="font-size:30px;font-weight:800;font-family:'Poppins',sans-serif;">{{ totalPlannedLabel }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-radius:18px;background:#fff;box-shadow:0 4px 18px rgba(31,35,51,0.06);min-width:180px;flex:1;">
+              <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#8388A8;font-weight:700;">Lançadas no diário</div>
+              <div style="font-size:30px;font-weight:800;font-family:'Poppins',sans-serif;color:#1F2333;">{{ totalLoggedLabel }}</div>
+            </div>
+          </div>
+          <div style="background:#fff;border-radius:18px;padding:8px 4px;box-shadow:0 4px 18px rgba(31,35,51,0.06);">
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+              <thead>
+                <tr>
+                  <th style="text-align:left;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:12px 16px;">Matéria</th>
+                  <th style="text-align:left;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:12px 16px;">Peso</th>
+                  <th style="text-align:left;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:12px 16px;">% do peso</th>
+                  <th style="text-align:left;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:12px 16px;">Horas/semana</th>
+                  <th style="text-align:left;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#B0B3C8;padding:12px 16px;">Lançadas</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ hoursRows }}" as="h" hint-placeholder-count="7">
+                  <tr style="border-top:1px solid #F0F1F9;">
+                    <td style="padding:11px 16px;"><span style="{{ h.dotStyle }}"></span><i class="{{ h.iconClass }}" style="color:{{ h.color }};margin-right:6px;"></i>{{ h.name }}</td>
+                    <td style="padding:11px 16px;">{{ h.weight }}</td>
+                    <td style="padding:11px 16px;">{{ h.percentLabel }}</td>
+                    <td style="padding:11px 16px;font-weight:600;">{{ h.plannedLabel }}</td>
+                    <td style="padding:11px 16px;color:#8388A8;">{{ h.loggedLabel }}</td>
+                  </tr>
+                </sc-for>
+                <tr style="border-top:2px solid #EAEBF6;">
+                  <td style="padding:11px 16px;font-weight:800;">TOTAL</td>
+                  <td style="padding:11px 16px;"></td>
+                  <td style="padding:11px 16px;"></td>
+                  <td style="padding:11px 16px;font-weight:800;">{{ totalPlannedLabel }}</td>
+                  <td style="padding:11px 16px;font-weight:800;">{{ totalLoggedLabel }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTechniques }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:24px;">
+          <div>
+            <h2 style="margin:0 0 4px;font-size:26px;font-weight:700;font-family:'Poppins',sans-serif;">Técnicas de estudo — o que a ciência mostra que funciona</h2>
+            <p style="font-size:13px;color:#8388A8;max-width:70ch;margin:0;">Baseado em Dunlosky, Rawson, Marsh, Nathan &amp; Willingham (2013), a revisão mais citada sobre eficácia de técnicas de aprendizagem.</p>
+          </div>
+
+          <sc-for list="{{ techniqueGroups }}" as="g" hint-placeholder-count="3">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span style="{{ g.tagStyle }}">{{ g.label }}</span>
+                <span style="font-size:12px;color:#8388A8;">{{ g.hint }}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
+                <sc-for list="{{ g.items }}" as="tech" hint-placeholder-count="3">
+                  <div style="background:#fff;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(31,35,51,0.06);border-left:5px solid {{ g.color }};">
+                    <div style="font-size:15px;font-weight:700;font-family:'Poppins',sans-serif;margin-bottom:6px;">{{ tech.name }}</div>
+                    <p style="font-size:12.5px;color:#4B4F6B;margin:0 0 10px;">{{ tech.what }}</p>
+                    <p style="font-size:12px;color:{{ g.color }};font-weight:600;margin:0;">{{ tech.usage }}</p>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+
+          <div style="background:linear-gradient(135deg,#6C5CE7,#4D96FF);border-radius:18px;padding:20px 22px;color:#fff;box-shadow:0 10px 24px rgba(108,92,231,0.3);">
+            <div style="font-size:16px;font-weight:700;font-family:'Poppins',sans-serif;margin-bottom:10px;">Resumo prático</div>
+            <sc-for list="{{ practicalTips }}" as="tip" hint-placeholder-count="3">
+              <p style="font-size:13px;margin:0 0 6px;opacity:0.95;">• {{ tip }}</p>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:rgba(31,35,51,0.45);z-index:10;">
+    <div style="width:min(420px,100%);display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:20px;background:#fff;box-shadow:0 24px 60px rgba(31,35,51,0.25);">
+      <h3 style="margin:0;font-size:20px;font-weight:700;font-family:'Poppins',sans-serif;">Nova sessão — {{ modalDayLabel }}</h3>
+      <label>
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:#4B4F6B;">Matéria</div>
+        <select value="{{ modalSubjectId }}" onChange="{{ onModalSubjectChange }}" style="width:100%;min-height:42px;padding:8px 12px;font-size:14px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:12px;">
+          <sc-for list="{{ subjects }}" as="opt" hint-placeholder-count="4">
+            <option value="{{ opt.id }}">{{ opt.name }}</option>
+          </sc-for>
+        </select>
+      </label>
+      <label>
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:#4B4F6B;">Assunto (opcional)</div>
+        <input value="{{ modalTopic }}" onChange="{{ onModalTopicChange }}" style="width:100%;min-height:42px;padding:8px 12px;font-size:14px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:12px;" />
+      </label>
+      <label>
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:#4B4F6B;">Tipo</div>
+        <select value="{{ modalType }}" onChange="{{ onModalTypeChange }}" style="width:100%;min-height:42px;padding:8px 12px;font-size:14px;color:#1F2333;background:#F8F9FD;border:2px solid #EAEBF6;border-radius:12px;">
+          <option value="ESTUDO">Estudo</option>
+          <option value="SIMULADO">Simulado</option>
+        </select>
+      </label>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px;">
+        <button onClick="{{ closeModal }}" style="color:#6B7093;border:2px solid #EAEBF6;background:transparent;border-radius:12px;padding:9px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+        <button onClick="{{ submitModal }}" style="color:#fff;border:none;background:linear-gradient(135deg,#6C5CE7,#4D96FF);border-radius:12px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;">Adicionar</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DOW = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+const TYPE_LABEL = { ESTUDO:"Estudo", SIMULADO:"Simulado", REVISAO_24H:"Revisão 24h", REVISAO_7D:"Revisão 7 dias", REVISAO_15D:"Revisão 15 dias", REVISAO_30D:"Revisão 30 dias" };
+const BRAND = "#6C5CE7";
+
+const SUBJECTS = [
+  { id:"s1", name:"Língua Portuguesa", icon:"ph-book-open", weight:1, hoursLogged:6.5, color:"#FF6B6B",
+    topics:[
+      {name:"Interpretação de texto, tipologia e gêneros textuais", theory:true, mastered:false, questions:0, correct:0},
+      {name:"Ortografia, acentuação e uso da crase", theory:true, mastered:true, questions:24, correct:20},
+      {name:"Morfologia (classes de palavras) e funções do 'que'/'se'", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Coesão e coerência textual; reescrita de frases", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Sintaxe (período simples e composto); concordância e regência", theory:true, mastered:true, questions:18, correct:15},
+      {name:"Colocação pronominal, pontuação e variação linguística", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s2", name:"Direito Constitucional", icon:"ph-scales", weight:1, hoursLogged:5.0, color:"#4D96FF",
+    topics:[
+      {name:"Constitucionalismo, conceito e classificação das Constituições", theory:true, mastered:true, questions:12, correct:9},
+      {name:"Eficácia, aplicabilidade e interpretação das normas constitucionais", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Poder Constituinte e Princípios Fundamentais", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Direitos e Garantias Fundamentais", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Organização do Estado e dos Poderes", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Controle de Constitucionalidade", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Administração Pública e Servidores Públicos (CF)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Tutelas constitucionais (HC, HD, MS, Ação Popular, ACP)", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s3", name:"Direito Administrativo", icon:"ph-buildings", weight:1, hoursLogged:5.8, color:"#2EC4B6",
+    topics:[
+      {name:"Princípios e Poderes Administrativos", theory:true, mastered:true, questions:16, correct:13},
+      {name:"Organização Administrativa e Atos Administrativos", theory:true, mastered:true, questions:20, correct:14},
+      {name:"Responsabilidade Civil do Estado; Controle da Administração", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Lei 8.666/93, Lei 14.133/2021 e Pregão (Lei 10.520/2002)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Serviços Públicos; Agentes Públicos e Concurso Público", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Improbidade Administrativa", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Processo Administrativo (Lei 9.784/99) e LAI (Lei 12.527/2011)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Lei de Responsabilidade Fiscal (LC 101/2000)", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s4", name:"Legislação Institucional do Órgão", icon:"ph-gavel", weight:1, hoursLogged:4.6, color:"#8338EC",
+    topics:[
+      {name:"Lei Orgânica Nacional da carreira (base federal)", theory:true, mastered:true, questions:14, correct:11},
+      {name:"Lei Orgânica / estatuto do órgão (estadual ou municipal)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Estatuto dos Funcionários Públicos da esfera do concurso", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Plano de Cargos/Carreiras do órgão + LGPD (Lei 13.709/2018)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Política Antifraude e Código de Ética do órgão", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s5", name:"Engenharia de Software", icon:"ph-flow-arrow", weight:2, hoursLogged:7.6, color:"#57CC99",
+    topics:[
+      {name:"Ciclo de vida e metodologias de desenvolvimento (cascata, ágil)", theory:true, mastered:true, questions:22, correct:17},
+      {name:"Processos interativo/incremental; práticas ágeis; TDD", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Gerenciamento de ciclo de vida de aplicações; integração contínua", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Requisitos: elicitação, histórias de usuário, MVP, prototipação, personas", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Diagrama Entidade-Relacionamento (ER) e modelagem", theory:false, mastered:false, questions:0, correct:0},
+      {name:"DevOps e CI/CD (conceitos e ferramentas)", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s6", name:"Arquitetura de Software", icon:"ph-stack", weight:2, hoursLogged:4.1, color:"#FF9F1C",
+    topics:[
+      {name:"Padrão MVC; microsserviços; arquitetura orientada a eventos", theory:true, mastered:true, questions:15, correct:11},
+      {name:"Arquitetura Orientada a Serviços (SOA) e interoperabilidade", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Padrões de projeto (design patterns) e anti-patterns", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Conteinerização; servidores de aplicação", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Frameworks de persistência (ORM); serviços de mensageria", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Padrões SOAP, REST, XML, XSLT, WSDL, JSON, RMI", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Refatoração, modernização e componentização de software", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s7", name:"Linguagens de Programação", icon:"ph-code", weight:2, hoursLogged:3.2, color:"#E1AD01",
+    topics:[
+      {name:"Orientação a Objetos: pilares e características estruturais", theory:true, mastered:true, questions:10, correct:9},
+      {name:"Coleções, tipos genéricos, threads e escalonamento", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Tratamento de exceções e anotações", theory:false, mastered:false, questions:0, correct:0},
+      {name:"HTML5, CSS3 e JavaScript", theory:true, mastered:true, questions:8, correct:8},
+      {name:"Python 3.7+ (sintaxe, estruturas, boas práticas)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Java Core 8+ (sintaxe, streams, coleções)", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s8", name:"Qualidade de Software", icon:"ph-check-circle", weight:1, hoursLogged:2.4, color:"#06AED5",
+    topics:[
+      {name:"Garantia da qualidade e métricas de código", theory:true, mastered:true, questions:10, correct:7},
+      {name:"Testes: unitário, integração, funcional, aceitação", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Testes de desempenho, carga e vulnerabilidade", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Gerência de configuração de software (Git)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Conceitos básicos de auditoria de sistemas", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s9", name:"Estrutura de Dados e Algoritmos", icon:"ph-tree-structure", weight:2, hoursLogged:5.1, color:"#FF5DA2",
+    topics:[
+      {name:"Tipos básicos e abstratos de dados (lista, fila, pilha, árvore)", theory:true, mastered:true, questions:15, correct:11},
+      {name:"Sub-rotinas: chamada por endereço, referência e valor", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Algoritmos de pesquisa e ordenação", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Listas lineares, encadeadas, vetores e matrizes", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Programação recursiva", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s10", name:"Arquitetura / Banco de Dados", icon:"ph-database", weight:2, hoursLogged:4.1, color:"#5C6BC0",
+    topics:[
+      {name:"Modelagem de dados: conceitual, lógica e física", theory:true, mastered:true, questions:15, correct:11},
+      {name:"Normalização, integridade referencial e metadados", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Modelagem dimensional e avaliação de modelos", theory:false, mastered:false, questions:0, correct:0},
+      {name:"SQL: DDL, DML, DCL, DTL", theory:false, mastered:false, questions:0, correct:0},
+      {name:"ACID, transações e performance de banco de dados", theory:false, mastered:false, questions:0, correct:0},
+      {name:"ETL e integração de dados; BI e mapeamento de fontes", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Manipulação de dados em planilhas; bases multidimensionais", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+  { id:"s11", name:"Segurança da Informação", icon:"ph-shield-check", weight:1, hoursLogged:2.4, color:"#C1121F",
+    topics:[
+      {name:"Desenvolvimento seguro: SAST / DAST / IAST", theory:true, mastered:true, questions:14, correct:12},
+      {name:"SSO (Single Sign-On) e Autenticação Multifator (MFA)", theory:false, mastered:false, questions:0, correct:0},
+      {name:"Gestão de identidade e acesso (autenticação, autorização, auditoria)", theory:false, mastered:false, questions:0, correct:0},
+    ]},
+];
+
+const TECHNIQUE_GROUPS = [
+  { key:"ALTA", label:"Alta eficácia", hint:"priorize sempre", color:"#2EC4B6",
+    items:[
+      { name:"Active Recall (prática de recuperação)", what:"Testar-se ativamente — fechar o material e tentar lembrar, responder questões, recitar em voz alta — em vez de reler. É a técnica com maior efeito comprovado sobre retenção de longo prazo.", usage:"Na planilha: aba Edital + questões no Diário todo dia, antes de considerar o assunto dominado." },
+      { name:"Repetição Espaçada (Spaced Repetition)", what:"Revisar o mesmo conteúdo em intervalos crescentes (1, 7, 15, 30 dias) em vez de estudar tudo de uma vez. Cada revisão no momento certo fortalece a memória muito mais que reestudar tudo (cramming).", usage:"No Diário: linhas de Revisão 24h / 7 dias / 15 dias / 30 dias geradas para cada assunto estudado." },
+      { name:"Intercalação (Interleaving)", what:"Misturar matérias numa mesma sessão, em vez de estudar um assunto isolado até exaustão. Parece mais difícil no curto prazo, mas melhora a capacidade de aplicar o conhecimento certo na hora certa.", usage:"O cronograma roda em rodízio entre as matérias, nunca em blocos fechados de uma matéria só." },
+    ]},
+  { key:"MODERADA", label:"Eficácia moderada", hint:"bom complemento", color:"#FF9F1C",
+    items:[
+      { name:"Elaboração (Self-Explanation)", what:"Perguntar e responder 'por quê' e 'como' sobre o conteúdo, em vez de só memorizar o 'o quê'. Explicar com suas próprias palavras cria conexões mais profundas.", usage:"Campo de anotações no Caderno de Erros: registre o fundamento da resposta certa." },
+      { name:"Exemplos Concretos", what:"Associar conceitos abstratos a exemplos e situações reais e específicas. Ajuda a lembrar e a transferir o conhecimento para questões com contextos diferentes.", usage:"Ao estudar Direito ou legislação, relacione com situações reais que você já vivencia." },
+      { name:"Prática Distribuída", what:"Estudar em sessões mais curtas e frequentes ao longo do tempo, em vez de sessões longas e raras. É o princípio da repetição espaçada aplicado à carga diária.", usage:"Rotina de 2h em dias úteis + 4h no fim de semana, em vez de uma maratona." },
+    ]},
+  { key:"BAIXA", label:"Baixa eficácia", hint:"evite usar sozinha", color:"#C1121F",
+    items:[
+      { name:"Releitura", what:"Ler o mesmo material várias vezes. Dá uma falsa sensação de domínio, mas o efeito real sobre a retenção é fraco quando usada sozinha, sem teste ativo.", usage:"Use só como primeiro contato com o conteúdo, nunca como método principal de revisão." },
+      { name:"Grifar e Destacar", what:"Marcar trechos do texto como importantes. É passivo, exige pouco esforço cognitivo e não força a reorganização da informação na memória.", usage:"Ajuda a localizar informação depois, mas não substitui fazer questões." },
+      { name:"Resumos", what:"Reescrever o conteúdo de forma condensada. Funciona bem para quem já sabe resumir, mas tem eficácia inconsistente.", usage:"Útil para organizar o material antes de estudar — depois, teste-se com active recall." },
+    ]},
+];
+
+const PRACTICAL_TIPS = [
+  "Priorize sempre: fazer questões (active recall) + revisar em intervalos crescentes (repetição espaçada) + misturar matérias (intercalação).",
+  "O erro mais comum é inverter a ordem: estudar teoria exaustivamente e deixar questões só para o fim. Comece a fazer questões cedo, mesmo errando muito no início.",
+  "Releitura, grifar e resumir sozinhos dão sensação de progresso, mas retêm pouco — use-os só como preparação, nunca como substituto de se testar.",
+];
+
+function subjectById(id) { return SUBJECTS.find(s => s.id === id); }
+function iconClass(icon) { return "ph " + icon; }
+function tint(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+function startOfWeek(d) {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const m = new Date(d);
+  m.setDate(d.getDate() + diff);
+  m.setHours(0,0,0,0);
+  return m;
+}
+
+let uid = 100;
+function nextId() { return "sess-" + (uid++); }
+
+class Component extends DCLogic {
+  state = {
+    screen: "login",
+    authMode: "login",
+    name: "", email: "", password: "",
+    weekOffset: 0,
+    expanded: {},
+    drafts: {},
+    sessions: [
+      { id:"a1", subjectId:"s2", topicName:"Poder Constituinte e Princípios Fundamentais", type:"ESTUDO", status:"TODO", minutes:90, questions:0, correct:0, dayIndex:0, weekOffset:0 },
+      { id:"a2", subjectId:"s1", topicName:"Ortografia, acentuação e uso da crase", type:"REVISAO_7D", status:"DONE", minutes:30, questions:10, correct:8, dayIndex:0, weekOffset:0 },
+      { id:"a3", subjectId:"s9", topicName:"Tipos básicos e abstratos de dados", type:"ESTUDO", status:"TODO", minutes:120, questions:0, correct:0, dayIndex:1, weekOffset:0 },
+      { id:"a4", subjectId:"s10", topicName:"Modelagem de dados: conceitual, lógica e física", type:"ESTUDO", status:"TODO", minutes:60, questions:0, correct:0, dayIndex:1, weekOffset:0 },
+      { id:"a5", subjectId:"s11", topicName:"Desenvolvimento seguro: SAST / DAST / IAST", type:"ESTUDO", status:"TODO", minutes:120, questions:0, correct:0, dayIndex:2, weekOffset:0 },
+      { id:"a6", subjectId:"s5", topicName:"Processos interativo/incremental; TDD", type:"REVISAO_24H", status:"DONE", minutes:20, questions:5, correct:5, dayIndex:2, weekOffset:0 },
+      { id:"a7", subjectId:"s6", topicName:"Arquitetura Orientada a Serviços (SOA)", type:"ESTUDO", status:"POSTPONED", minutes:120, questions:0, correct:0, dayIndex:3, weekOffset:0 },
+      { id:"a8", subjectId:"s7", topicName:"Coleções, tipos genéricos, threads", type:"ESTUDO", status:"TODO", minutes:120, questions:0, correct:0, dayIndex:4, weekOffset:0 },
+      { id:"a9", subjectId:"s10", topicName:"Normalização, integridade referencial", type:"REVISAO_15D", status:"TODO", minutes:120, questions:0, correct:0, dayIndex:5, weekOffset:0 },
+      { id:"a10", subjectId:"s9", topicName:"Sub-rotinas: chamada por endereço, referência e valor", type:"ESTUDO", status:"TODO", minutes:120, questions:0, correct:0, dayIndex:5, weekOffset:0 },
+      { id:"a11", subjectId:"s1", topicName:null, type:"SIMULADO", status:"TODO", minutes:240, questions:0, correct:0, dayIndex:6, weekOffset:0 },
+    ],
+    modalOpen: false,
+    modalDayIndex: null,
+    modalSubjectId: SUBJECTS[0].id,
+    modalTopic: "",
+    modalType: "ESTUDO",
+  };
+
+  goBoard = () => this.setState({ screen: "board" });
+  goEdital = () => this.setState({ screen: "edital" });
+  goStats = () => this.setState({ screen: "stats" });
+  goTechniques = () => this.setState({ screen: "techniques" });
+  logout = () => this.setState({ screen: "login" });
+
+  setLoginMode = () => this.setState({ authMode: "login" });
+  setRegisterMode = () => this.setState({ authMode: "register" });
+  onNameChange = (e) => this.setState({ name: e.target.value });
+  onEmailChange = (e) => this.setState({ email: e.target.value });
+  onPassChange = (e) => this.setState({ password: e.target.value });
+  doLogin = (e) => { e.preventDefault(); this.setState({ screen: "board" }); };
+
+  prevWeek = () => this.setState(s => ({ weekOffset: s.weekOffset - 1 }));
+  nextWeek = () => this.setState(s => ({ weekOffset: s.weekOffset + 1 }));
+  thisWeek = () => this.setState({ weekOffset: 0 });
+
+  toggleExpand(id) { this.setState(s => ({ expanded: { ...s.expanded, [id]: !s.expanded[id] } })); }
+  setDraft(id, field, val) { this.setState(s => ({ drafts: { ...s.drafts, [id]: { ...(s.drafts[id]||{}), [field]: val } } })); }
+  saveDone(id) {
+    const d = this.state.drafts[id] || {};
+    this.setState(s => ({
+      sessions: s.sessions.map(x => x.id === id ? { ...x, status:"DONE", questions: Number(d.questions ?? x.questions), correct: Number(d.correct ?? x.correct) } : x),
+      expanded: { ...s.expanded, [id]: false },
+    }));
+  }
+  postponeSession(id) { this.setState(s => ({ sessions: s.sessions.map(x => x.id === id ? { ...x, status:"POSTPONED" } : x) })); }
+  removeSession(id) { this.setState(s => ({ sessions: s.sessions.filter(x => x.id !== id) })); }
+
+  openModal(dayIndex) { this.setState({ modalOpen:true, modalDayIndex: dayIndex, modalSubjectId: SUBJECTS[0].id, modalTopic:"", modalType:"ESTUDO" }); }
+  closeModal = () => this.setState({ modalOpen: false });
+  onModalSubjectChange = (e) => this.setState({ modalSubjectId: e.target.value });
+  onModalTopicChange = (e) => this.setState({ modalTopic: e.target.value });
+  onModalTypeChange = (e) => this.setState({ modalType: e.target.value });
+  submitModal = () => {
+    const s = this.state;
+    this.setState(st => ({
+      sessions: [...st.sessions, { id: nextId(), subjectId: s.modalSubjectId, topicName: s.modalTopic || null, type: s.modalType, status:"TODO", minutes:60, questions:0, correct:0, dayIndex: s.modalDayIndex, weekOffset: st.weekOffset }],
+      modalOpen: false,
+    }));
+  };
+
+  navBtnStyle(active) {
+    return `background:${active ? "#fff" : "transparent"};box-shadow:${active ? "0 2px 6px rgba(31,35,51,0.1)" : "none"};border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 14px;border-radius:9px;color:${active ? BRAND : "#6B7093"};`;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const today = new Date();
+    const weekStart = startOfWeek(today);
+    weekStart.setDate(weekStart.getDate() + s.weekOffset * 7);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const fmt = (d) => d.toLocaleDateString("pt-BR", { day:"2-digit", month:"2-digit" });
+
+    const doneCount = s.sessions.filter(x => x.status === "DONE").length;
+    const xp = doneCount * 40;
+    const level = Math.floor(xp/150) + 1;
+
+    const buildSession = (sess) => {
+      const subj = subjectById(sess.subjectId);
+      const draft = s.drafts[sess.id] || {};
+      const isDone = sess.status === "DONE";
+      const isPostponed = sess.status === "POSTPONED";
+      return {
+        id: sess.id,
+        subjectName: subj.name,
+        subjectIconClass: iconClass(subj.icon),
+        subjectIconInlineStyle: `color:${subj.color};font-size:14px;`,
+        typeLabel: TYPE_LABEL[sess.type] || sess.type,
+        typeTagStyle: `font-size:10px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:${subj.color};background:${tint(subj.color,0.12)};padding:2px 8px;border-radius:999px;`,
+        hasTopic: !!sess.topicName,
+        topicName: sess.topicName,
+        isDone,
+        resultLabel: `${sess.correct}/${sess.questions} questões`,
+        canDone: !isDone,
+        canPostpone: sess.status === "TODO",
+        expanded: !!s.expanded[sess.id],
+        draftQuestions: draft.questions ?? sess.questions,
+        draftCorrect: draft.correct ?? sess.correct,
+        onDraftQChange: (e) => this.setDraft(sess.id, "questions", e.target.value),
+        onDraftCChange: (e) => this.setDraft(sess.id, "correct", e.target.value),
+        toggleExpand: () => this.toggleExpand(sess.id),
+        save: () => this.saveDone(sess.id),
+        postpone: () => this.postponeSession(sess.id),
+        remove: () => this.removeSession(sess.id),
+        cardStyle: `background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 3px 10px rgba(31,35,51,0.06);border-left:4px solid ${subj.color};opacity:${isPostponed ? 0.5 : 1};`,
+      };
+    };
+
+    const days = DOW.map((name, i) => {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      const isToday = d.toDateString() === today.toDateString();
+      const daySessions = s.sessions.filter(x => x.dayIndex === i && x.weekOffset === s.weekOffset).map(buildSession);
+      const totalMin = s.sessions.filter(x => x.dayIndex === i && x.weekOffset === s.weekOffset && x.status !== "POSTPONED").reduce((acc, x) => acc + x.minutes, 0);
+      return {
+        name, dateLabel: fmt(d),
+        colStyle: `background:${isToday ? tint(BRAND,0.06) : "#EFF0F8"};border-radius:18px;padding:14px;display:flex;flex-direction:column;min-width:215px;flex:1 1 215px;${isToday ? `box-shadow:0 0 0 2px ${BRAND};` : ""}`,
+        totalHoursLabel: (totalMin/60).toFixed(1) + "h",
+        sessions: daySessions,
+        openAdd: () => this.openModal(i),
+      };
+    });
+
+    const subjects = SUBJECTS.map(subj => {
+      const done = subj.topics.filter(t => t.mastered).length;
+      const progress = done / subj.topics.length;
+      return {
+        id: subj.id, name: subj.name, iconClass: iconClass(subj.icon), weight: subj.weight, color: subj.color,
+        iconBadgeStyle: `width:38px;height:38px;border-radius:12px;background:${subj.color};display:grid;place-items:center;flex:none;`,
+        weightTagStyle: `font-size:11px;font-weight:700;color:${subj.color};background:${tint(subj.color,0.12)};padding:4px 10px;border-radius:999px;`,
+        progressLabel: Math.round(progress*100) + "%",
+        progressFillStyle: `height:100%;border-radius:6px;background:${subj.color};width:${Math.round(progress*100)}%;`,
+        topics: subj.topics.map(t => ({
+          name: t.name,
+          theoryLabel: t.theory ? "Sim" : "Não",
+          theoryTagStyle: `font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;${t.theory ? `color:${subj.color};background:${tint(subj.color,0.12)};` : "color:#B0B3C8;background:#F0F1F9;"}`,
+          questionsLabel: t.questions ? `${t.correct}/${t.questions}` : "—",
+          statusLabel: t.mastered ? "Matei" : "Pendente",
+          statusTagStyle: `font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;${t.mastered ? "color:#2EA95C;background:#E4F8EA;" : "color:#B0B3C8;background:#F0F1F9;"}`,
+        })),
+      };
+    });
+
+    const totalWeekHours = 18;
+    const totalWeight = SUBJECTS.reduce((a,x) => a+x.weight, 0);
+    const hoursRows = SUBJECTS.map(subj => {
+      const percent = subj.weight/totalWeight;
+      const planned = totalWeekHours*percent;
+      return {
+        name: subj.name, iconClass: iconClass(subj.icon), weight: subj.weight, color: subj.color,
+        percentLabel: Math.round(percent*100) + "%",
+        plannedLabel: planned.toFixed(1) + "h",
+        loggedLabel: subj.hoursLogged.toFixed(1) + "h",
+        _planned: planned, _logged: subj.hoursLogged,
+      };
+    });
+    const totalPlanned = hoursRows.reduce((a,x) => a+x._planned, 0);
+    const totalLogged = hoursRows.reduce((a,x) => a+x._logged, 0);
+
+    const techniqueGroups = TECHNIQUE_GROUPS.map(g => ({
+      label: g.label, hint: g.hint, color: g.color,
+      tagStyle: `font-size:11px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:${g.color};background:${tint(g.color,0.12)};padding:4px 12px;border-radius:999px;`,
+      items: g.items,
+    }));
+
+    const tabActive = "background:#fff;color:#1F2333;box-shadow:0 2px 8px rgba(31,35,51,0.08);";
+    const tabInactive = "background:transparent;color:#8388A8;";
+    const tabBase = "flex:1;border:none;padding:9px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;border-radius:11px;";
+
+    return {
+      isLogin: s.screen === "login",
+      isApp: s.screen !== "login",
+      isBoard: s.screen === "board",
+      isEdital: s.screen === "edital",
+      isStats: s.screen === "stats",
+      isTechniques: s.screen === "techniques",
+      isRegister: s.authMode === "register",
+      setLoginMode: this.setLoginMode, setRegisterMode: this.setRegisterMode,
+      tabLoginStyle: tabBase + (s.authMode === "login" ? tabActive : tabInactive),
+      tabRegisterStyle: tabBase + (s.authMode === "register" ? tabActive : tabInactive),
+      nameVal: s.name, onNameChange: this.onNameChange,
+      emailVal: s.email, onEmailChange: this.onEmailChange,
+      passVal: s.password, onPassChange: this.onPassChange,
+      doLogin: this.doLogin,
+      submitLabel: s.authMode === "login" ? "Entrar" : "Criar conta e gerar edital",
+      goBoard: this.goBoard, goEdital: this.goEdital, goStats: this.goStats, goTechniques: this.goTechniques, logout: this.logout,
+      navBoardStyle: this.navBtnStyle(s.screen === "board"),
+      navEditalStyle: this.navBtnStyle(s.screen === "edital"),
+      navStatsStyle: this.navBtnStyle(s.screen === "stats"),
+      navTechniquesStyle: this.navBtnStyle(s.screen === "techniques"),
+      navArrowStyle: `width:36px;height:36px;border-radius:10px;border:none;background:#fff;box-shadow:0 2px 8px rgba(31,35,51,0.08);cursor:pointer;color:#4B4F6B;`,
+      pillBtnStyle: `border:none;background:#fff;box-shadow:0 2px 8px rgba(31,35,51,0.08);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:${BRAND};font-family:'Inter',sans-serif;`,
+      miniBtnStyle: `color:#fff;border:none;background:${BRAND};border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;`,
+      miniBtnSecondaryStyle: `color:#8388A8;border:2px solid #EAEBF6;background:transparent;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;`,
+      prevWeek: this.prevWeek, nextWeek: this.nextWeek, thisWeek: this.thisWeek,
+      weekLabel: `${fmt(weekStart)} — ${fmt(weekEnd)}`,
+      days, subjects,
+      hoursRows,
+      totalPlannedLabel: totalPlanned.toFixed(1) + "h",
+      totalLoggedLabel: totalLogged.toFixed(1) + "h",
+      techniqueGroups,
+      practicalTips: PRACTICAL_TIPS,
+      streakLabel: "5 dias",
+      xpLabel: xp + " xp",
+      levelLabel: level,
+      modalOpen: s.modalOpen,
+      modalDayLabel: s.modalDayIndex !== null ? DOW[s.modalDayIndex] : "",
+      modalSubjectId: s.modalSubjectId, onModalSubjectChange: this.onModalSubjectChange,
+      modalTopic: s.modalTopic, onModalTopicChange: this.onModalTopicChange,
+      modalType: s.modalType, onModalTypeChange: this.onModalTypeChange,
+      closeModal: this.closeModal, submitModal: this.submitModal,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
