@@ -22,6 +22,7 @@ export default function Revisoes() {
   const [tab, setTab] = useState<Tab>("programadas");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shownDays, setShownDays] = useState(7);
   const today = localISO(new Date());
 
   const load = useCallback(async () => {
@@ -53,6 +54,8 @@ export default function Revisoes() {
 
   const byDate = new Map<string, SessionRow[]>();
   for (const s of list) byDate.set(s.date, [...(byDate.get(s.date) || []), s]);
+  const allDays = [...byDate.entries()];
+  const visibleDays = allDays.slice(0, shownDays);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "programadas", label: "Programadas" },
@@ -74,7 +77,10 @@ export default function Revisoes() {
 
       <div className="rev-tabs" role="tablist">
         {tabs.map((t) => (
-          <button key={t.key} role="tab" aria-selected={tab === t.key} className={tab === t.key ? "active" : ""} onClick={() => setTab(t.key)}>
+          <button key={t.key} role="tab" aria-selected={tab === t.key} className={tab === t.key ? "active" : ""} onClick={() => {
+              setTab(t.key);
+              setShownDays(7);
+            }}>
             {t.label}
             {groups[t.key].length > 0 && <span className={`rev-count ${t.key === "atrasadas" ? "warn" : ""}`}>{groups[t.key].length}</span>}
           </button>
@@ -87,7 +93,7 @@ export default function Revisoes() {
         </p>
       )}
 
-      {[...byDate.entries()].map(([date, items]) => (
+      {visibleDays.map(([date, items]) => (
         <section key={date} className="rev-day">
           <h3>{dayLabel(date, today)}</h3>
           {items.map((s) => (
@@ -106,6 +112,12 @@ export default function Revisoes() {
           ))}
         </section>
       ))}
+
+      {allDays.length > visibleDays.length && (
+        <button className="ghost-btn more-btn" onClick={() => setShownDays((n) => n + 7)}>
+          Mostrar mais dias ({allDays.length - visibleDays.length} restantes)
+        </button>
+      )}
 
       {selected && (
         <SessionModal

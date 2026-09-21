@@ -130,6 +130,7 @@ export default function Edital() {
               </button>
               <h3>{s.name}</h3>
               <span className="tag weight">peso {s.weight}</span>
+              {s.area && <span className="tag weight">{s.area}</span>}
               <div className="progress-bar">
                 <div className="progress-fill" style={{ width: `${Math.round(s.progress * 100)}%`, background: s.color }} />
               </div>
@@ -259,6 +260,7 @@ export default function Edital() {
       {editing && (
         <SubjectModal
           subject={editing}
+          areas={[...new Set(subjects.map((x) => x.area).filter(Boolean))] as string[]}
           onClose={() => setEditing(null)}
           onSave={async (v) => {
             await api.updateSubject(editing.id, v);

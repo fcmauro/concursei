@@ -21,7 +21,7 @@
 
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; margin: 0; }
-body { min-width: 320px; background: radial-gradient(circle at 8% -10%, rgba(245, 184, 61, .22), transparent 28%), radial-gradient(circle at 96% 8%, rgba(71, 118, 230, .14), transparent 30%), var(--bg); }
+body { min-width: 320px; background: radial-gradient(circle at 8% -10%, rgba(245, 184, 61, .22), transparent 28%), radial-gradient(circle at 96% 8%, rgba(71, 118, 230, .14), transparent 30%), var(--bg); background-attachment: fixed; background-repeat: no-repeat; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

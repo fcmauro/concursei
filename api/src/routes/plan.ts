@@ -73,7 +73,7 @@ router.post("/", (req: AuthedRequest, res) => {
   for (const s of kept) occupied.set(s.date, (occupied.get(s.date) || 0) + s.minutes);
   const alreadyPlanned = new Set(kept.filter((s) => s.type === "ESTUDO" && s.status === "TODO" && s.topic_id).map((s) => s.topic_id));
 
-  const subjects = db.prepare("SELECT id, name, color, weight FROM subjects WHERE user_id = ? AND weight > 0 ORDER BY sort_order").all(uid) as any[];
+  const subjects = db.prepare("SELECT id, name, color, weight, area FROM subjects WHERE user_id = ? AND weight > 0 ORDER BY sort_order").all(uid) as any[];
   const topicRows = db
     .prepare(
       `SELECT t.id, t.subject_id, t.name, t.done,
@@ -92,17 +92,28 @@ router.post("/", (req: AuthedRequest, res) => {
     pendingTotal += ids.length;
   }
   const weightOf = new Map<string, number>(subjects.map((s) => [s.id, Math.max(1, s.weight)]));
-  const current = new Map<string, number>();
+  const orderOf = new Map<string, number>(subjects.map((s, i) => [s.id, i]));
+  const areaOf = new Map<string, string>(subjects.map((s) => [s.id, (s.area || "").trim().toLowerCase() || `matéria:${s.id}`]));
+  const totalOf = new Map<string, number>([...queues.entries()].map(([id, q]) => [id, q.length]));
+  const picked = new Map<string, number>();
+  let lastArea = "";
+  let lastSubject = "";
+
+  // Todas as matérias avançam no mesmo ritmo (fração dos assuntos já agendados; o peso adianta as mais importantes)
+  // e, entre as mais atrasadas, prefere-se uma de outra área/matéria que a anterior para intercalar.
   const nextTopic = () => {
     const active = [...queues.entries()].filter(([, q]) => q.length > 0).map(([id]) => id);
     if (!active.length) return null;
-    const sum = active.reduce((a, id) => a + weightOf.get(id)!, 0);
-    let best = active[0];
-    for (const id of active) {
-      current.set(id, (current.get(id) || 0) + weightOf.get(id)!);
-      if ((current.get(id) || 0) > (current.get(best) || 0)) best = id;
-    }
-    current.set(best, (current.get(best) || 0) - sum);
+    const score = (id: string) => (picked.get(id) || 0) / (totalOf.get(id) || 1) / Math.sqrt(weightOf.get(id)!);
+    const ranked = active.sort((a, b) => score(a) - score(b) || orderOf.get(a)! - orderOf.get(b)!);
+    const window = ranked.slice(0, 8);
+    const best =
+      window.find((id) => areaOf.get(id) !== lastArea && id !== lastSubject) ||
+      window.find((id) => id !== lastSubject) ||
+      ranked[0];
+    picked.set(best, (picked.get(best) || 0) + 1);
+    lastArea = areaOf.get(best)!;
+    lastSubject = best;
     return { subjectId: best, topicId: queues.get(best)!.shift()! };
   };
 

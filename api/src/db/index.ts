@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
+import { DEFAULT_SUBJECTS } from "../lib/seedContent";
 
 const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, "..", "..", "data.db");
 
@@ -20,6 +21,13 @@ for (const [col, ddl] of [
 ] as const) {
   if (!userCols.some((c) => c.name === col)) db.exec(ddl);
 }
+const subjectCols = db.prepare("PRAGMA table_info(subjects)").all() as { name: string }[];
+if (!subjectCols.some((c) => c.name === "area")) {
+  db.exec("ALTER TABLE subjects ADD COLUMN area TEXT");
+  const setArea = db.prepare("UPDATE subjects SET area = ? WHERE name = ? AND area IS NULL");
+  for (const s of DEFAULT_SUBJECTS) setArea.run(s.area, s.name);
+}
+
 const sessionCols = db.prepare("PRAGMA table_info(sessions)").all() as { name: string }[];
 if (!sessionCols.some((c) => c.name === "auto")) db.exec("ALTER TABLE sessions ADD COLUMN auto INTEGER NOT NULL DEFAULT 0");
 

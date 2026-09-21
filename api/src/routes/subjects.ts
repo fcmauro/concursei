@@ -48,6 +48,7 @@ router.get("/", (req: AuthedRequest, res) => {
       name: s.name,
       weight: s.weight,
       color: s.color,
+      area: s.area as string | null,
       order: s.sort_order,
       topics,
       progress: topics.length ? masteredCount / topics.length : 0,
@@ -59,15 +60,16 @@ router.get("/", (req: AuthedRequest, res) => {
 
 // POST /subjects -> cria matéria própria
 router.post("/", (req: AuthedRequest, res) => {
-  const { name, weight = 1, color = "#D9E1F2" } = req.body || {};
+  const { name, weight = 1, color = "#D9E1F2", area } = req.body || {};
   if (!name) return res.status(400).json({ error: "name é obrigatório" });
+  const areaValue = typeof area === "string" && area.trim() ? area.trim().slice(0, 40) : null;
   const id = crypto.randomUUID();
   const maxOrder = (
     db.prepare("SELECT COALESCE(MAX(sort_order),-1) as m FROM subjects WHERE user_id = ?").get(req.userId!) as any
   ).m;
   db.prepare(
-    "INSERT INTO subjects (id, user_id, name, weight, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)"
-  ).run(id, req.userId!, name, weight, color, maxOrder + 1);
+    "INSERT INTO subjects (id, user_id, name, weight, color, sort_order, area) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run(id, req.userId!, name, weight, color, maxOrder + 1, areaValue);
   res.status(201).json({ id, name, weight, color, order: maxOrder + 1, topics: [] });
 });
 
@@ -156,13 +158,14 @@ router.delete("/topics/:topicId", (req: AuthedRequest, res) => {
 router.patch("/:id", (req: AuthedRequest, res) => {
   const subject = db.prepare("SELECT id FROM subjects WHERE id = ? AND user_id = ?").get(req.params.id, req.userId!);
   if (!subject) return res.status(404).json({ error: "Matéria não encontrada" });
-  const { name, weight, color, move } = req.body || {};
+  const { name, weight, color, move, area } = req.body || {};
   if (move !== undefined && move !== "up" && move !== "down") return res.status(400).json({ error: "move deve ser up ou down" });
   if (name !== undefined && (typeof name !== "string" || !name.trim())) return res.status(400).json({ error: "name inválido" });
   if (weight !== undefined && (!Number.isFinite(Math.round(Number(weight))) || Math.round(Number(weight)) < 1 || Math.round(Number(weight)) > 10)) {
     return res.status(400).json({ error: "weight deve ser de 1 a 10" });
   }
   if (color !== undefined && (typeof color !== "string" || !HEX.test(color))) return res.status(400).json({ error: "color inválida" });
+  if (area !== undefined && area !== null && typeof area !== "string") return res.status(400).json({ error: "area inválida" });
   if (move !== undefined) {
     const ids = (db.prepare("SELECT id FROM subjects WHERE user_id = ? ORDER BY sort_order, created_at").all(req.userId!) as { id: string }[]).map((r) => r.id);
     db.transaction(() => moveInOrder("subjects", ids, String(req.params.id), move))();
@@ -177,8 +180,10 @@ router.patch("/:id", (req: AuthedRequest, res) => {
     db.prepare("UPDATE subjects SET weight = ? WHERE id = ?").run(w, req.params.id);
   }
   if (color !== undefined) {
-    if (typeof color !== "string" || !HEX.test(color)) return res.status(400).json({ error: "color inválida" });
     db.prepare("UPDATE subjects SET color = ? WHERE id = ?").run(color, req.params.id);
+  }
+  if (area !== undefined) {
+    db.prepare("UPDATE subjects SET area = ? WHERE id = ?").run(typeof area === "string" && area.trim() ? area.trim().slice(0, 40) : null, req.params.id);
   }
   res.json({ ok: true });
 });

@@ -116,9 +116,11 @@ export function importData(userId: string, data: ImportData, dryRun = false): Im
       let s = db.prepare("SELECT id FROM subjects WHERE user_id = ? AND name = ?").get(userId, name) as { id: string } | undefined;
       const weight = data.weights?.[name];
       if (!s) {
-        const color = DEFAULT_SUBJECTS.find((d) => d.name === name)?.color || "#94a3b8";
+        const known = DEFAULT_SUBJECTS.find((d) => d.name === name);
         s = { id: crypto.randomUUID() };
-        db.prepare("INSERT INTO subjects (id, user_id, name, weight, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)").run(s.id, userId, name, Math.min(10, Math.max(1, weight ?? 1)), color, ++order);
+        db.prepare("INSERT INTO subjects (id, user_id, name, weight, color, sort_order, area) VALUES (?, ?, ?, ?, ?, ?, ?)").run(
+          s.id, userId, name, Math.min(10, Math.max(1, weight ?? 1)), known?.color || "#94a3b8", ++order, known?.area ?? null
+        );
         stats.subjectsCreated++;
       } else if (weight !== undefined) {
         db.prepare("UPDATE subjects SET weight = ? WHERE id = ?").run(Math.min(10, Math.max(1, weight)), s.id);

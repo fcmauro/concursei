@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
@@ -50,13 +51,51 @@ const PAGES: { path: string; element: React.ReactNode }[] = [
   { path: "/guia", element: <Guia /> },
 ];
 
+function NavMore({ pathname }: { pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const active = MORE_NAV.some((m) => m.to === pathname);
+
+  useEffect(() => setOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className={`nav-more ${active ? "active" : ""}`}>
+      <button type="button" className="nav-more-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        Mais <span aria-hidden="true">▾</span>
+      </button>
+      {open && (
+        <div className="nav-more-menu" role="menu">
+          {MORE_NAV.map((n) => (
+            <NavLink key={n.to} to={n.to} role="menuitem" className={linkClass}>
+              {n.label}
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? "active" : "");
 
 function PrivateLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   if (!user) return <Navigate to="/login" replace />;
-  const moreActive = MORE_NAV.some((m) => location.pathname === m.to);
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -67,16 +106,7 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
               {n.label}
             </NavLink>
           ))}
-          <details key={location.pathname} className={`nav-more ${moreActive ? "active" : ""}`}>
-            <summary>Mais ▾</summary>
-            <div className="nav-more-menu">
-              {MORE_NAV.map((n) => (
-                <NavLink key={n.to} to={n.to} className={linkClass}>
-                  {n.label}
-                </NavLink>
-              ))}
-            </div>
-          </details>
+          <NavMore pathname={location.pathname} />
         </nav>
         <div className="app-user">
           {user.examName && <em className="exam-name">{user.examName}</em>}

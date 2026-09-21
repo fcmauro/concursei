@@ -53,7 +53,7 @@ router.post("/register", (req, res) => {
 
   // seed default subjects/topics for the new user (cargo 405 MPMS)
   const insertSubject = db.prepare(
-    "INSERT INTO subjects (id, user_id, name, weight, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)"
+    "INSERT INTO subjects (id, user_id, name, weight, color, sort_order, area) VALUES (?, ?, ?, ?, ?, ?, ?)"
   );
   const insertTopic = db.prepare(
     "INSERT INTO topics (id, subject_id, name, sort_order) VALUES (?, ?, ?, ?)"
@@ -61,7 +61,7 @@ router.post("/register", (req, res) => {
   const seedTx = db.transaction(() => {
     DEFAULT_SUBJECTS.forEach((s, si) => {
       const subjectId = crypto.randomUUID();
-      insertSubject.run(subjectId, userId, s.name, s.weight, s.color, si);
+      insertSubject.run(subjectId, userId, s.name, s.weight, s.color, si, s.area);
       s.topics.forEach((t, ti) => {
         insertTopic.run(crypto.randomUUID(), subjectId, t, ti);
       });
