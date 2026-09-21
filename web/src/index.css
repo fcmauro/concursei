@@ -2,24 +2,26 @@
 
 :root {
   font-family: 'DM Sans', sans-serif;
-  color: #e8eefc;
-  background: #080b14;
+  color: #24324a;
+  background: #fffaf2;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --bg: #080b14;
-  --panel: #101522;
-  --panel-2: #151b2b;
-  --line: rgba(148, 163, 184, .14);
-  --muted: #8d99b2;
-  --text: #f3f6ff;
-  --accent: #8b7cff;
-  --accent-2: #4dd4b2;
-  --danger: #ff7c9d;
+  --bg: #fffaf2;
+  --panel: #ffffff;
+  --panel-2: #fff4df;
+  --line: #e8dfd2;
+  --muted: #718096;
+  --text: #24324a;
+  --accent: #f26b4f;
+  --accent-2: #20a879;
+  --sun: #f5b83d;
+  --blue: #4776e6;
+  --danger: #d9536f;
 }
 
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; margin: 0; }
-body { min-width: 320px; background: radial-gradient(circle at 70% -10%, rgba(116, 91, 255, .18), transparent 35%), var(--bg); }
+body { min-width: 320px; background: radial-gradient(circle at 8% -10%, rgba(245, 184, 61, .22), transparent 28%), radial-gradient(circle at 96% 8%, rgba(71, 118, 230, .14), transparent 30%), var(--bg); }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
