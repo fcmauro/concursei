@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { db } from "../db";
 import { AuthedRequest, requireAuth } from "../lib/auth";
+import { queueAutoSync } from "../lib/calendarSync";
 
 const router = Router();
 router.use(requireAuth);
@@ -138,6 +139,7 @@ router.patch("/topics/:topicId", (req: AuthedRequest, res) => {
       moveInOrder("topics", ids, topicId, move);
     }
   })();
+  queueAutoSync(req.userId!);
   res.json({ ok: true });
 });
 
@@ -151,6 +153,7 @@ router.delete("/topics/:topicId", (req: AuthedRequest, res) => {
     db.prepare("UPDATE errors SET topic_id = NULL WHERE topic_id = ?").run(req.params.topicId);
     db.prepare("DELETE FROM topics WHERE id = ?").run(req.params.topicId);
   })();
+  queueAutoSync(req.userId!);
   res.status(204).end();
 });
 
@@ -185,6 +188,7 @@ router.patch("/:id", (req: AuthedRequest, res) => {
   if (area !== undefined) {
     db.prepare("UPDATE subjects SET area = ? WHERE id = ?").run(typeof area === "string" && area.trim() ? area.trim().slice(0, 40) : null, req.params.id);
   }
+  queueAutoSync(req.userId!);
   res.json({ ok: true });
 });
 
@@ -198,6 +202,7 @@ router.delete("/:id", (req: AuthedRequest, res) => {
     db.prepare("DELETE FROM topics WHERE subject_id = ?").run(req.params.id);
     db.prepare("DELETE FROM subjects WHERE id = ?").run(req.params.id);
   })();
+  queueAutoSync(req.userId!);
   res.status(204).end();
 });
 

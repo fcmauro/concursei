@@ -20,6 +20,8 @@ function resolveSecret() {
 
 const JWT_SECRET = resolveSecret();
 
+export const getSecret = () => JWT_SECRET;
+
 export function hashPassword(pw: string) {
   return bcrypt.hashSync(pw, 10);
 }

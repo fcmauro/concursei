@@ -61,6 +61,12 @@ export const api = {
   getDoneSessions: () => request("/sessions?status=DONE"),
   generatePlan: (payload: Record<string, unknown>) => request("/plan", { method: "POST", body: JSON.stringify(payload) }),
 
+  getCalendar: () => request("/calendar"),
+  saveCalendar: (payload: Record<string, unknown>) => request("/calendar", { method: "PUT", body: JSON.stringify(payload) }),
+  syncCalendar: (full = false) => request("/calendar/sync", { method: "POST", body: JSON.stringify({ full }) }),
+  wipeCalendar: () => request("/calendar/events", { method: "DELETE" }),
+  deleteCalendar: (removeEvents: boolean) => request(`/calendar?removeEvents=${removeEvents ? 1 : 0}`, { method: "DELETE" }),
+
   getMe: () => request("/me"),
   updateMe: (payload: Record<string, unknown>) => request("/me", { method: "PATCH", body: JSON.stringify(payload) }),
   getDashboard: (today: string, from: string, to: string) => request(`/stats/dashboard?today=${today}&from=${from}&to=${to}`),

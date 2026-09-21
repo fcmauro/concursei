@@ -23,7 +23,7 @@ export default function Painel() {
     const [d, ts, reviews] = await Promise.all([api.getDashboard(t, from, to), api.getSessions(t, t), api.getReviews()]);
     setData(d);
     setToday(ts.filter((s: SessionRow) => s.status !== "POSTPONED"));
-    setDueReviews(reviews.filter((s: SessionRow) => s.status === "TODO" && s.date <= t).slice(0, 6));
+    setDueReviews(reviews.filter((s: SessionRow) => s.status === "TODO" && s.date <= t).slice(0, 8));
   }, []);
 
   useEffect(() => {
@@ -45,6 +45,8 @@ export default function Painel() {
   const qPct = qGoal > 0 ? Math.min(100, Math.round((data.week.questions / qGoal) * 100)) : 0;
   const maxDay = Math.max(60, ...data.week.days.map((d: any) => d.minutes));
   const todayIso = localISO(new Date());
+  const todayMin = today.reduce((a, s) => a + s.minutes, 0);
+  const todayDone = today.filter((s) => s.status === "DONE").length;
 
   const me: MeData = {
     examName: data.examName,
@@ -59,7 +61,7 @@ export default function Painel() {
       <div className="painel-head">
         <div>
           <h2>Olá, {user?.name}</h2>
-          <p className="subtitle" style={{ margin: 0 }}>
+          <p className="subtitle">
             {data.examName || "Defina seu concurso"} ·{" "}
             <button className="link-btn" onClick={() => setSettings(true)}>
               editar concurso e metas
@@ -75,7 +77,6 @@ export default function Painel() {
               <span>
                 {isPrep ? (left === 1 ? "dia de preparação" : "dias de preparação") : left === 1 ? "dia para a prova" : "dias para a prova"}
               </span>
-              {isPrep && <em>prova ainda sem data</em>}
             </>
           ) : (
             <span>{isPrep ? "Preparação encerrada" : "Prova já realizada"}</span>
@@ -87,6 +88,7 @@ export default function Painel() {
         <div className="stat-card">
           <span>Tempo de estudo</span>
           <strong>{formatMinutes(data.totalMinutes)}</strong>
+          <small>{formatMinutes(data.week.minutes)} nesta semana</small>
         </div>
         <div className="stat-card">
           <span>Desempenho</span>
@@ -98,6 +100,9 @@ export default function Painel() {
         <div className="stat-card">
           <span>Progresso no edital</span>
           <strong>{progress === null ? "—" : `${progress}%`}</strong>
+          <div className="bar thin">
+            <i style={{ width: `${progress ?? 0}%` }} />
+          </div>
           <small>
             {data.topics.mastered} de {data.topics.total} assuntos
           </small>
@@ -107,13 +112,17 @@ export default function Painel() {
           <strong>
             {data.streak} {data.streak === 1 ? "dia" : "dias"}
           </strong>
-          <small>seguidos estudando</small>
+          <div className="streak-strip" aria-label="Últimos 28 dias">
+            {data.last28.map((d: any) => (
+              <span key={d.date} className={d.minutes > 0 ? "on" : ""} title={`${d.date}: ${formatMinutes(d.minutes)}`} />
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="painel-grid">
+      <div className="painel-grid3">
         <section className="panel">
-          <h3>Metas da semana</h3>
+          <h3>Semana</h3>
           <div className="goal">
             <div className="goal-row">
               <span>Horas</span>
@@ -121,7 +130,7 @@ export default function Painel() {
                 {formatMinutes(data.week.minutes)} / {data.goals.hoursWeek}h
               </span>
             </div>
-            <div className="bar">
+            <div className="bar thin">
               <i style={{ width: `${hoursPct}%` }} />
             </div>
           </div>
@@ -130,7 +139,7 @@ export default function Painel() {
               <span>Questões</span>
               <span>{qGoal > 0 ? `${data.week.questions} / ${qGoal}` : `${data.week.questions} (sem meta)`}</span>
             </div>
-            <div className="bar alt">
+            <div className="bar thin alt">
               <i style={{ width: `${qPct}%` }} />
             </div>
           </div>
@@ -148,18 +157,45 @@ export default function Painel() {
         </section>
 
         <section className="panel">
-          <h3>Constância nos estudos</h3>
-          <p className="hint" style={{ margin: "0 0 10px" }}>
-            Últimos 28 dias. Dia preenchido = teve estudo concluído.
-          </p>
-          <div className="streak-grid">
-            {data.last28.map((d: any) => (
-              <span key={d.date} className={d.minutes > 0 ? "on" : ""} title={`${d.date}: ${formatMinutes(d.minutes)}`} />
-            ))}
-          </div>
-          <h3 style={{ marginTop: 22 }}>Revisões de hoje e atrasadas</h3>
+          <h3>
+            Hoje
+            <small>
+              {todayDone}/{today.length} feitos · {formatMinutes(todayMin)}
+            </small>
+          </h3>
+          {today.length === 0 ? (
+            <p className="hint">Nada planejado para hoje.</p>
+          ) : (
+            <ul className="mini-list">
+              {today.map((s) => (
+                <li key={s.id} className={s.status === "DONE" ? "done" : ""}>
+                  <i style={{ background: s.subject_color }} />
+                  <span>
+                    <b>{s.subject_name}</b>
+                    <small>
+                      {TYPE_LABEL[s.type]}
+                      {s.topic_name ? ` · ${s.topic_name}` : ""}
+                    </small>
+                  </span>
+                  <em>{s.status === "DONE" ? `✔ ${formatMinutes(s.minutes)}` : formatMinutes(s.minutes)}</em>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link className="link-btn" to="/board">
+            Abrir Diário →
+          </Link>
+        </section>
+
+        <section className="panel">
+          <h3>
+            Revisões
+            <small>
+              {data.reviews.due} hoje · {data.reviews.overdue} atrasadas
+            </small>
+          </h3>
           {dueReviews.length === 0 ? (
-            <p className="hint">Nenhuma revisão pendente. 🎉</p>
+            <p className="hint">Nenhuma revisão pendente.</p>
           ) : (
             <ul className="mini-list">
               {dueReviews.map((r) => (
@@ -176,7 +212,7 @@ export default function Painel() {
             </ul>
           )}
           <Link className="link-btn" to="/revisoes">
-            Ver todas as revisões ({data.reviews.due} hoje · {data.reviews.overdue} atrasadas) →
+            Ver todas as revisões →
           </Link>
         </section>
       </div>
@@ -184,7 +220,7 @@ export default function Painel() {
       <section className="panel">
         <h3>Desempenho por matéria</h3>
         <div className="table-scroll">
-          <table className="edital-table">
+          <table className="edital-table compact">
             <thead>
               <tr>
                 <th>Matéria</th>
@@ -196,18 +232,21 @@ export default function Painel() {
               </tr>
             </thead>
             <tbody>
-              {data.perSubject.map((s: any) => (
-                <tr key={s.subjectId}>
-                  <td>
-                    <span className="dot" style={{ background: s.color }} /> {s.name}
-                  </td>
-                  <td>{formatMinutes(s.minutes)}</td>
-                  <td>{s.questions}</td>
-                  <td>{s.correct}</td>
-                  <td>{s.questions - s.correct}</td>
-                  <td>{pct(s.correct, s.questions) === null ? "—" : `${pct(s.correct, s.questions)}%`}</td>
-                </tr>
-              ))}
+              {data.perSubject.map((s: any) => {
+                const p = pct(s.correct, s.questions);
+                return (
+                  <tr key={s.subjectId}>
+                    <td>
+                      <span className="dot" style={{ background: s.color }} /> {s.name}
+                    </td>
+                    <td>{formatMinutes(s.minutes)}</td>
+                    <td>{s.questions}</td>
+                    <td className="ok">{s.correct}</td>
+                    <td className="bad">{s.questions - s.correct}</td>
+                    <td>{p === null ? "—" : <span className={`perf ${p >= 80 ? "good" : p >= 60 ? "mid" : "low"}`}>{p}%</span>}</td>
+                  </tr>
+                );
+              })}
               {data.perSubject.length === 0 && (
                 <tr>
                   <td colSpan={6}>Cadastre matérias na aba Edital para acompanhar seu desempenho.</td>
@@ -216,31 +255,6 @@ export default function Painel() {
             </tbody>
           </table>
         </div>
-      </section>
-
-      <section className="panel">
-        <h3>
-          Planejamento de hoje <Link className="link-btn" to="/board">abrir Diário →</Link>
-        </h3>
-        {today.length === 0 ? (
-          <p className="hint">Nada planejado para hoje. Adicione sessões no Diário.</p>
-        ) : (
-          <ul className="mini-list">
-            {today.map((s) => (
-              <li key={s.id}>
-                <i style={{ background: s.subject_color }} />
-                <span>
-                  <b>{s.subject_name}</b>
-                  <small>
-                    {TYPE_LABEL[s.type]}
-                    {s.topic_name ? ` · ${s.topic_name}` : ""}
-                  </small>
-                </span>
-                <em>{s.status === "DONE" ? `✔ ${formatMinutes(s.minutes)}` : `⏱ ${formatMinutes(s.minutes)}`}</em>
-              </li>
-            ))}
-          </ul>
-        )}
       </section>
 
       {settings && (

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { formatMinutes, localISO } from "../lib/date";
 import { toMin, WEEKDAYS } from "../lib/schedule";
 import { REMINDERS_KEY } from "../components/Lembretes";
+import CalendarSync from "../components/CalendarSync";
 
 type Windows = Record<number, { start: string; end: string }[]>;
 
@@ -192,6 +193,8 @@ export default function Rotina() {
           </button>
         </div>
       </section>
+
+      <CalendarSync />
 
       <section className="panel">
         <h3>Compromissos fora do estudo</h3>

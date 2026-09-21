@@ -11,6 +11,7 @@ import simuladoRoutes from "./routes/simulados";
 import errorRoutes from "./routes/errors";
 import planRoutes from "./routes/plan";
 import importRoutes from "./routes/import";
+import calendarRoutes from "./routes/calendar";
 
 const app = express();
 app.set("trust proxy", true);
@@ -29,6 +30,7 @@ app.use("/simulados", simuladoRoutes);
 app.use("/errors", errorRoutes);
 app.use("/plan", planRoutes);
 app.use("/import", importRoutes);
+app.use("/calendar", calendarRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

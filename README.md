@@ -115,6 +115,11 @@ Você pode usar um **túnel próprio** ou **reaproveitar um túnel que já roda*
 - **Simulados** e **Caderno de erros** (com padrão dos motivos de erro).
 - **Histórico** (lista por dia, evolução de 30 dias, tempo por matéria) e **Importar**
   (planilha Excel com modelo para baixar, ou texto colado do edital; tem prévia e não duplica).
+- **Calendário do iPhone** (CalDAV/iCloud): na aba Rotina, informe o Apple ID e uma *senha de app*;
+  as sessões do Diário viram eventos no calendário escolhido (criado se não existir), encaixados
+  nas janelas da Rotina e fora dos compromissos. Atualiza sozinho ao gerar/alterar o plano. A senha
+  fica criptografada no banco (AES-256-GCM, chave derivada do segredo do servidor); nunca é
+  versionada. Para outro servidor CalDAV, defina `CALDAV_SERVER_URL`.
 - **Lembretes** do navegador (início da janela de estudo e revisões do dia).
 - **Horas** (por peso) e **Guia** de estudo com técnicas e links.
 - Cadastro em branco ou a partir de um modelo (MPMS 405 – Analista de TI).

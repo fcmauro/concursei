@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthedRequest, requireAuth } from "../lib/auth";
 import { importData, validateImport } from "../lib/importData";
+import { queueAutoSync } from "../lib/calendarSync";
 
 const router = Router();
 router.use(requireAuth);
@@ -14,6 +15,7 @@ router.post("/", (req: AuthedRequest, res) => {
   const problem = validateImport(data);
   if (problem) return res.status(400).json({ error: problem });
   const stats = importData(req.userId!, data, Boolean(dryRun));
+  if (!dryRun) queueAutoSync(req.userId!);
   res.json({ dryRun: Boolean(dryRun), stats });
 });
 

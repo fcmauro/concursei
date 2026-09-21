@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { db } from "../db";
 import { AuthedRequest, requireAuth } from "../lib/auth";
+import { triggerAutoSync } from "../lib/calendarSync";
 
 const router = Router();
 router.use(requireAuth);
@@ -258,7 +259,7 @@ router.post("/", (req: AuthedRequest, res) => {
     for (const i of items) ins.run(i.id, uid, i.subjectId || simSubjectId, i.topicId, i.date, i.type, i.minutes, i.note || null, i.originId);
   })();
 
-  res.json({ applied: true, created: items.length, summary, sample });
+  res.json({ applied: true, created: items.length, summary, sample, calendarSync: triggerAutoSync(uid) });
 });
 
 export default router;

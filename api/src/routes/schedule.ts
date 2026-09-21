@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { db } from "../db";
 import { AuthedRequest, requireAuth } from "../lib/auth";
+import { queueAutoSync } from "../lib/calendarSync";
 
 const router = Router();
 router.use(requireAuth);
@@ -35,6 +36,7 @@ router.put("/availability", (req: AuthedRequest, res) => {
     for (const w of windows) ins.run(crypto.randomUUID(), req.userId!, w.weekday, w.start, w.end);
   });
   tx();
+  queueAutoSync(req.userId!);
   res.json({ ok: true, count: windows.length });
 });
 
@@ -83,12 +85,14 @@ router.post("/events", (req: AuthedRequest, res) => {
     start,
     end
   );
+  queueAutoSync(req.userId!);
   res.status(201).json(db.prepare("SELECT id, title, category, date, weekday, start_time, end_time FROM events WHERE id = ?").get(id));
 });
 
 router.delete("/events/:id", (req: AuthedRequest, res) => {
   const r = db.prepare("DELETE FROM events WHERE id = ? AND user_id = ?").run(req.params.id, req.userId!);
   if (!r.changes) return res.status(404).json({ error: "Compromisso não encontrado" });
+  queueAutoSync(req.userId!);
   res.status(204).end();
 });
 

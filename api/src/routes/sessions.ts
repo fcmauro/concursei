@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { db } from "../db";
 import { AuthedRequest, requireAuth } from "../lib/auth";
+import { queueAutoSync } from "../lib/calendarSync";
 
 const router = Router();
 router.use(requireAuth);
@@ -100,6 +101,7 @@ router.post("/", (req: AuthedRequest, res) => {
      VALUES (?, ?, ?, ?, ?, ?, 'TODO', ?, ?)`
   ).run(id, req.userId!, subjectId, topicId || null, date, type, minutes, note || null);
 
+  queueAutoSync(req.userId!);
   res.status(201).json(getSessionRow(id));
 });
 
@@ -153,6 +155,7 @@ router.patch("/:id", (req: AuthedRequest, res) => {
     generateRevisions(updated);
   }
 
+  queueAutoSync(req.userId!);
   res.json(updated);
 });
 
@@ -166,6 +169,7 @@ router.delete("/:id", (req: AuthedRequest, res) => {
     db.prepare("UPDATE sessions SET origin_session_id = NULL WHERE origin_session_id = ?").run(req.params.id);
     db.prepare("DELETE FROM sessions WHERE id = ?").run(req.params.id);
   })();
+  queueAutoSync(req.userId!);
   res.status(204).end();
 });
 

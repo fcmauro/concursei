@@ -100,3 +100,24 @@ CREATE TABLE IF NOT EXISTS errors (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_errors_user ON errors(user_id);
+
+-- sincronização com calendário CalDAV (iCloud): a senha de app fica criptografada (AES-256-GCM)
+CREATE TABLE IF NOT EXISTS calendar_settings (
+  user_id TEXT PRIMARY KEY REFERENCES users(id),
+  apple_id TEXT NOT NULL,
+  password_enc TEXT NOT NULL,
+  calendar_name TEXT NOT NULL DEFAULT 'Concursei',
+  auto_sync INTEGER NOT NULL DEFAULT 1,
+  last_sync_at TEXT,
+  last_result TEXT,
+  last_error TEXT
+);
+
+CREATE TABLE IF NOT EXISTS calendar_sync (
+  user_id TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  uid TEXT NOT NULL,
+  hash TEXT NOT NULL,
+  seq INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, session_id)
+);

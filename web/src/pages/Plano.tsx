@@ -30,6 +30,7 @@ export default function Plano() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [cal, setCal] = useState<{ state: "off" | "running" | "ok" | "error"; text: string } | null>(null);
 
   const [wdH, setWdH] = useState(2);
   const [wdStart, setWdStart] = useState("19:00");
@@ -74,6 +75,25 @@ export default function Plano() {
     }
   }
 
+  function watchCalendar() {
+    setCal({ state: "running", text: "Sincronizando com o calendário do iPhone..." });
+    const tick = async () => {
+      try {
+        const c = await api.getCalendar();
+        const j = c.job;
+        if (j?.running) {
+          setCal({ state: "running", text: `Sincronizando com o calendário do iPhone... ${j.progress.done} de ${j.progress.total}` });
+          setTimeout(tick, 1500);
+        } else if (j?.error) setCal({ state: "error", text: `Calendário do iPhone: ${j.error}` });
+        else if (j?.stats) setCal({ state: "ok", text: `Calendário do iPhone atualizado: ${j.stats.created} novos, ${j.stats.updated} atualizados, ${j.stats.deleted} removidos.` });
+        else setTimeout(tick, 1500);
+      } catch {
+        setCal({ state: "error", text: "Não consegui verificar a sincronização do calendário." });
+      }
+    };
+    tick();
+  }
+
   async function run(apply: boolean) {
     setBusy(true);
     setError(null);
@@ -92,6 +112,8 @@ export default function Plano() {
           }
         }
         setDone(`${r.created} sessões criadas no Diário.`);
+        if (r.calendarSync) watchCalendar();
+        else api.getCalendar().then((c) => setCal(c.configured ? null : { state: "off", text: "Quer ver isso no iPhone? Conecte o calendário na aba Rotina." })).catch(() => {});
         window.dispatchEvent(new Event("concursei:sessions"));
       }
     } catch (e: any) {
@@ -302,6 +324,7 @@ export default function Plano() {
             {done ? (
               <>
                 <span className="ok-text">✔ {done}</span>
+                {cal && <span className={cal.state === "error" ? "error" : "hint"}>{cal.text}</span>}
                 <Link className="primary" to="/board" style={{ textDecoration: "none", padding: "12px 20px" }}>
                   Abrir Diário
                 </Link>
