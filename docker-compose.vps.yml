@@ -1,0 +1,41 @@
+# Deploy em VPS (funciona em x86 e ARM). Sem portas publicadas: o acesso é só pelo túnel Cloudflare.
+# Uso: crie um arquivo .env ao lado deste com TUNNEL_TOKEN=... (e, se quiser, JWT_SECRET, CORS_ORIGIN)
+#      docker compose -f docker-compose.vps.yml up -d --build
+services:
+  api:
+    build: ./api
+    container_name: estudo-api
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-}
+      - ALLOW_REGISTRATION=${ALLOW_REGISTRATION:-false}
+      - DATABASE_PATH=/app/data/data.db
+      - PORT=4000
+    volumes:
+      - estudo-data:/app/data
+    mem_limit: 256m
+
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: /api
+    container_name: estudo-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 64m
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: estudo-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  estudo-data:

@@ -52,6 +52,44 @@ dados (`.jwt-secret`). Para forçar um valor próprio: `JWT_SECRET=... docker co
 Os dados ficam persistidos no volume `estudo-data` (arquivo SQLite), então
 sobrevivem a rebuilds/restarts dos containers.
 
+## Deploy na VPS com CI/CD (GitHub Actions)
+
+Fluxo: a cada push na `main`, o Actions roda os testes (tipos da API, build do web e um
+teste de fumaça com Docker) e, se passar, envia a release por SSH. **O build é feito na
+própria VPS** (funciona em ARM), com health check e **rollback automático** se a nova
+versão não ficar saudável. Antes de cada deploy é feito um backup do banco.
+
+O acesso público é pelo túnel Cloudflare (`docker-compose.vps.yml`): nenhuma porta do app
+fica aberta no host.
+
+### Configuração única
+
+1. **Túnel:** no Cloudflare Zero Trust crie um túnel, copie o token e adicione um
+   *public hostname* apontando para `http://web:80`.
+2. **Na VPS**, crie `~/concursei/.env`:
+   ```
+   TUNNEL_TOKEN=<token do túnel>
+   ALLOW_REGISTRATION=true     # deixe true só até criar sua conta; depois troque para false
+   # JWT_SECRET=...            # opcional (senão é gerado e guardado no volume)
+   # CORS_ORIGIN=https://seu.dominio
+   ```
+   O usuário do deploy precisa estar no grupo `docker`.
+3. **Chave SSH de deploy** (na sua máquina): `ssh-keygen -t ed25519 -f concursei_deploy -N ""`;
+   coloque `concursei_deploy.pub` em `~/.ssh/authorized_keys` da VPS.
+4. **Secrets no GitHub** (Settings → Secrets and variables → Actions):
+   `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` (conteúdo de `concursei_deploy`),
+   `VPS_KNOWN_HOSTS` (saída de `ssh-keyscan -H <host>`) e, se não for a 22, `VPS_PORT`.
+   Recomenda-se criar o *Environment* `production` com aprovação manual.
+
+### Operação
+
+- **Deploy manual/reexecução:** aba Actions → CI/CD → *Run workflow*.
+- **Backup manual:** `~/concursei/current/scripts/backup.sh ~/concursei/backups` (mantém 14).
+- **Restaurar dados de outra instalação:** copie o `.db` para o volume antes do primeiro
+  start (`docker run --rm -v concursei_estudo-data:/d -v $PWD:/b alpine cp /b/arquivo.db /d/data.db`).
+- **Logs:** `docker logs estudo-api` (ou Dozzle, se já usa).
+- As 3 últimas releases ficam em `~/concursei/releases`; `current` aponta para a ativa.
+
 ## O que o app faz
 
 - **Painel**: tempo de estudo, desempenho, progresso no edital, constância, contagem

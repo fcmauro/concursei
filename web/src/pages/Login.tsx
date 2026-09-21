@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,6 +11,14 @@ export default function Login() {
   const [template, setTemplate] = useState("blank");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [registration, setRegistration] = useState(true);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/auth/config`)
+      .then((r) => r.json())
+      .then((c) => setRegistration(c.registration !== false))
+      .catch(() => {});
+  }, []);
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
@@ -42,9 +50,11 @@ export default function Login() {
           <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
             Entrar
           </button>
-          <button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>
-            Criar conta
-          </button>
+          {registration && (
+            <button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>
+              Criar conta
+            </button>
+          )}
         </div>
 
         {mode === "register" && (

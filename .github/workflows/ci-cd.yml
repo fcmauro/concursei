@@ -1,0 +1,117 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    name: API (tipos)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      - run: npm ci --legacy-peer-deps
+      - run: npx tsc --noEmit
+
+  web:
+    name: Web (tipos + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  smoke:
+    name: Teste de fumaça (Docker)
+    needs: [api, web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Subir a stack
+        run: docker compose up -d --build
+      - name: Esperar ficar saudável
+        run: |
+          for i in $(seq 1 40); do
+            curl -sf http://localhost:8080/api/health && break
+            sleep 3
+          done
+          curl -sf http://localhost:8080/api/health
+      - name: Fluxo básico (cadastro, login, edital, painel)
+        run: |
+          B=http://localhost:8080/api
+          H='content-type: application/json'
+          REG=$(curl -sf -X POST $B/auth/register -H "$H" -d '{"email":"ci@example.com","password":"senha-forte-ci-1","name":"CI","template":"mpms405"}')
+          TOKEN=$(echo "$REG" | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])')
+          curl -sf -X POST $B/auth/login -H "$H" -d '{"email":"ci@example.com","password":"senha-forte-ci-1"}' > /dev/null
+          N=$(curl -sf $B/subjects -H "authorization: Bearer $TOKEN" | python3 -c 'import sys,json;print(len(json.load(sys.stdin)))')
+          test "$N" -eq 11
+          curl -sf "$B/stats/dashboard?today=2026-01-05&from=2026-01-05&to=2026-01-11" -H "authorization: Bearer $TOKEN" > /dev/null
+          curl -sf http://localhost:8080/ | grep -q "<div id=\"root\">"
+      - name: Logs em caso de falha
+        if: failure()
+        run: docker compose logs --tail 80
+      - name: Derrubar
+        if: always()
+        run: docker compose down -v
+
+  deploy:
+    name: Deploy na VPS
+    needs: smoke
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_PORT: ${{ secrets.VPS_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Empacotar e enviar a release
+        run: |
+          SHA="${GITHUB_SHA::12}"
+          PORT="${VPS_PORT:-22}"
+          git archive --format=tar.gz -o release.tgz HEAD api web docker-compose.vps.yml scripts
+          scp -i ~/.ssh/deploy_key -P "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes release.tgz "$VPS_USER@$VPS_HOST:/tmp/concursei-$SHA.tgz"
+      - name: Publicar (build na VPS, health check e rollback automático)
+        run: |
+          SHA="${GITHUB_SHA::12}"
+          PORT="${VPS_PORT:-22}"
+          ssh -i ~/.ssh/deploy_key -p "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
+            "set -e; B=\$HOME/concursei; mkdir -p \$B/releases/$SHA; tar xzf /tmp/concursei-$SHA.tgz -C \$B/releases/$SHA; rm -f /tmp/concursei-$SHA.tgz; bash \$B/releases/$SHA/scripts/deploy.sh $SHA"

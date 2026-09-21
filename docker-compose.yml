@@ -6,6 +6,7 @@ services:
     environment:
       - JWT_SECRET=${JWT_SECRET:-}
       - CORS_ORIGIN=${CORS_ORIGIN:-}
+      - ALLOW_REGISTRATION=${ALLOW_REGISTRATION:-true}
       - PORT=4000
       - DATABASE_PATH=/app/data/data.db
     volumes:

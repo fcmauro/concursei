@@ -20,9 +20,14 @@ function rateLimited(key: string, max = 10, windowMs = 15 * 60 * 1000) {
   return entry.count > max;
 }
 
+const registrationOpen = () => process.env.ALLOW_REGISTRATION !== "false";
+
 const router = Router();
 
+router.get("/config", (_req, res) => res.json({ registration: registrationOpen() }));
+
 router.post("/register", (req, res) => {
+  if (!registrationOpen()) return res.status(403).json({ error: "Cadastro de novas contas desativado neste servidor" });
   if (rateLimited(`reg:${req.ip}`, 20)) return res.status(429).json({ error: "Muitas tentativas. Aguarde alguns minutos." });
   const { email, password, name, examName, template } = req.body || {};
   if (!email || !password || !name) {
