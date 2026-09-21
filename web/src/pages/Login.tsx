@@ -7,6 +7,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [examName, setExamName] = useState("");
+  const [template, setTemplate] = useState("blank");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
@@ -20,7 +22,7 @@ export default function Login() {
       if (mode === "login") {
         await login(email, password);
       } else {
-        await register(email, password, name);
+        await register(email, password, name, examName, template);
       }
       navigate("/board");
     } catch (err: any) {
@@ -34,7 +36,7 @@ export default function Login() {
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>Concursei</h1>
-        <p className="subtitle">Concurso MPMS — Analista TI / Desenvolvimento de Sistemas</p>
+        <p className="subtitle">Organize a preparação para qualquer concurso: edital, diário, revisões e horas.</p>
 
         <div className="tabs">
           <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
@@ -51,6 +53,21 @@ export default function Login() {
             <input value={name} onChange={(e) => setName(e.target.value)} required />
           </label>
         )}
+        {mode === "register" && (
+          <>
+            <label>
+              Concurso / cargo
+              <input value={examName} onChange={(e) => setExamName(e.target.value)} placeholder="Ex.: TJ-SP — Escrevente" />
+            </label>
+            <label>
+              Edital inicial
+              <select value={template} onChange={(e) => setTemplate(e.target.value)}>
+                <option value="blank">Em branco (eu cadastro as matérias)</option>
+                <option value="mpms405">Modelo: MPMS — Analista TI / Desenvolvimento de Sistemas</option>
+              </select>
+            </label>
+          </>
+        )}
         <label>
           E-mail
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -63,10 +80,10 @@ export default function Login() {
         {error && <div className="error">{error}</div>}
 
         <button type="submit" className="primary" disabled={loading}>
-          {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar conta e gerar edital"}
+          {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar conta"}
         </button>
         {mode === "register" && (
-          <p className="hint">Ao criar a conta, o edital do cargo (matérias + assuntos) já vem pré-carregado.</p>
+          <p className="hint">Você pode começar em branco e montar matérias e assuntos do seu edital na aba Edital, ou partir de um modelo pronto.</p>
         )}
       </form>
     </div>

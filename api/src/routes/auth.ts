@@ -4,10 +4,12 @@ import { db, nowIso } from "../db";
 import { hashPassword, verifyPassword, signToken } from "../lib/auth";
 import { DEFAULT_SUBJECTS } from "../lib/seedContent";
 
+const MPMS_EXAM_NAME = "MPMS — Analista TI / Desenvolvimento de Sistemas";
+
 const router = Router();
 
 router.post("/register", (req, res) => {
-  const { email, password, name } = req.body || {};
+  const { email, password, name, examName, template } = req.body || {};
   if (!email || !password || !name) {
     return res.status(400).json({ error: "email, password e name são obrigatórios" });
   }
@@ -16,11 +18,14 @@ router.post("/register", (req, res) => {
     return res.status(409).json({ error: "E-mail já cadastrado" });
   }
 
+  const useMpmsTemplate = template === "mpms405";
+  const finalExamName: string | null =
+    (typeof examName === "string" && examName.trim()) || (useMpmsTemplate ? MPMS_EXAM_NAME : null);
   const userId = crypto.randomUUID();
   const passwordHash = hashPassword(password);
   db.prepare(
-    "INSERT INTO users (id, email, password_hash, name) VALUES (?, ?, ?, ?)"
-  ).run(userId, email, passwordHash, name);
+    "INSERT INTO users (id, email, password_hash, name, exam_name) VALUES (?, ?, ?, ?, ?)"
+  ).run(userId, email, passwordHash, name, finalExamName);
 
   // seed default subjects/topics for the new user (cargo 405 MPMS)
   const insertSubject = db.prepare(
@@ -38,10 +43,10 @@ router.post("/register", (req, res) => {
       });
     });
   });
-  seedTx();
+  if (useMpmsTemplate) seedTx();
 
   const token = signToken(userId);
-  res.status(201).json({ token, user: { id: userId, email, name } });
+  res.status(201).json({ token, user: { id: userId, email, name, examName: finalExamName } });
 });
 
 router.post("/login", (req, res) => {
@@ -50,13 +55,13 @@ router.post("/login", (req, res) => {
     return res.status(400).json({ error: "email e password são obrigatórios" });
   }
   const user = db
-    .prepare("SELECT id, email, name, password_hash FROM users WHERE email = ?")
+    .prepare("SELECT id, email, name, exam_name, password_hash FROM users WHERE email = ?")
     .get(email) as any;
   if (!user || !verifyPassword(password, user.password_hash)) {
     return res.status(401).json({ error: "Credenciais inválidas" });
   }
   const token = signToken(user.id);
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, examName: user.exam_name } });
 });
 
 export default router;

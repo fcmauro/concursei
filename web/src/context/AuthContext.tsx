@@ -6,12 +6,13 @@ interface User {
   id: string;
   email: string;
   name: string;
+  examName?: string | null;
 }
 
 interface AuthContextValue {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, examName: string, template: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -34,8 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(data.token, data.user);
   }
 
-  async function register(email: string, password: string, name: string) {
-    const data = await api.register(email, password, name);
+  async function register(email: string, password: string, name: string, examName: string, template: string) {
+    const data = await api.register(email, password, name, examName, template);
     persist(data.token, data.user);
   }
 

@@ -2,7 +2,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "LÍNGUA PORTUGUESA",
     weight: 1,
-    color: "#FCE4D6",
+    color: "#FF6B6B",
     topics: [
       "Interpretação de texto, tipologia e gêneros textuais",
       "Ortografia, acentuação e uso da crase",
@@ -15,7 +15,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "DIREITO CONSTITUCIONAL",
     weight: 1,
-    color: "#D9E1F2",
+    color: "#4D96FF",
     topics: [
       "Constitucionalismo, conceito e classificação das Constituições",
       "Eficácia, aplicabilidade e interpretação das normas constitucionais",
@@ -35,7 +35,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "DIREITO ADMINISTRATIVO",
     weight: 1,
-    color: "#DDEBF7",
+    color: "#2EC4B6",
     topics: [
       "Princípios e Poderes Administrativos",
       "Organização Administrativa e Atos Administrativos",
@@ -52,7 +52,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "LEGISLAÇÃO INSTITUCIONAL MP",
     weight: 1,
-    color: "#E2EFDA",
+    color: "#8338EC",
     topics: [
       "Lei Orgânica Nacional do MP (Lei 8.625/93)",
       "Lei Orgânica do MPMS (LC Estadual 72/1994)",
@@ -64,7 +64,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "ENGENHARIA DE SOFTWARE",
     weight: 2,
-    color: "#FFF2CC",
+    color: "#57CC99",
     topics: [
       "Ciclo de vida e metodologias de desenvolvimento (cascata, ágil)",
       "Processos interativo/incremental; práticas ágeis; TDD",
@@ -77,7 +77,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "ARQUITETURA DE SOFTWARE",
     weight: 2,
-    color: "#FBE5D6",
+    color: "#FF9F1C",
     topics: [
       "Padrão MVC; Microsserviços; Arquitetura orientada a eventos",
       "Arquitetura Orientada a Serviços (SOA) e interoperabilidade",
@@ -92,7 +92,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "LINGUAGENS DE PROGRAMAÇÃO",
     weight: 2,
-    color: "#D6DCE4",
+    color: "#E1AD01",
     topics: [
       "Orientação a Objetos: pilares e características estruturais",
       "Coleções, tipos genéricos, threads e escalonamento",
@@ -105,7 +105,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "QUALIDADE DE SOFTWARE",
     weight: 1,
-    color: "#E4DFEC",
+    color: "#06AED5",
     topics: [
       "Garantia da qualidade e métricas de código",
       "Testes: unitário, integração, funcional, aceitação",
@@ -117,7 +117,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "ESTRUTURA DE DADOS E ALGORITMOS",
     weight: 2,
-    color: "#F8CBAD",
+    color: "#FF5DA2",
     topics: [
       "Tipos básicos e abstratos de dados (lista, fila, pilha, árvore)",
       "Sub-rotinas: chamada por endereço, referência e valor",
@@ -129,7 +129,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "ARQUITETURA / BANCO DE DADOS",
     weight: 2,
-    color: "#C6E0B4",
+    color: "#5C6BC0",
     topics: [
       "Modelagem de dados: conceitual, lógica e física",
       "Normalização, integridade referencial e metadados",
@@ -143,7 +143,7 @@ export const DEFAULT_SUBJECTS: { name: string; weight: number; color: string; to
   {
     name: "SEGURANÇA DA INFORMAÇÃO",
     weight: 1,
-    color: "#F4CCCC",
+    color: "#C1121F",
     topics: [
       "Desenvolvimento seguro: SAST / DAST / IAST",
       "SSO (Single Sign-On) e Autenticação Multifator (MFA)",

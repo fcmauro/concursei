@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Board from "./pages/Board";
 import Edital from "./pages/Edital";
 import Stats from "./pages/Stats";
+import Guia from "./pages/Guia";
 import "./app.css";
 
 function PrivateLayout({ children }: { children: React.ReactNode }) {
@@ -23,8 +24,12 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
           <NavLink to="/stats" className={({ isActive }) => (isActive ? "active" : "")}>
             Horas
           </NavLink>
+          <NavLink to="/guia" className={({ isActive }) => (isActive ? "active" : "")}>
+            Guia
+          </NavLink>
         </nav>
         <div className="app-user">
+          {user.examName && <em className="exam-name">{user.examName}</em>}
           <span>{user.name}</span>
           <button onClick={logout}>Sair</button>
         </div>
@@ -61,6 +66,14 @@ export default function App() {
             element={
               <PrivateLayout>
                 <Stats />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/guia"
+            element={
+              <PrivateLayout>
+                <Guia />
               </PrivateLayout>
             }
           />
