@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
-import { downloadTemplate, parsePastedText, parseWorkbook } from "../lib/importParsers";
+import { parsePastedText, parseWorkbook } from "../lib/importParsers";
 import type { ImportPayload } from "../lib/importParsers";
 
 type Mode = "excel" | "texto";
@@ -101,14 +101,14 @@ export default function Importar() {
         <section className="panel">
           <h3>Enviar planilha (.xlsx)</h3>
           <p className="hint" style={{ margin: 0 }}>
-            Aceita o modelo do Concursei e também a planilha de cronograma antiga (abas EDITAL, DICA DE HORAS e Diário de estudo). A leitura é feita no seu navegador.
+            Baixe o modelo, preencha as abas Edital (e, se quiser, Diário) e envie aqui. O modelo traz instruções, listas suspensas e exemplos prontos. Também aceita a planilha de cronograma antiga (abas EDITAL, DICA DE HORAS e Diário de estudo). A leitura é feita no seu navegador.
           </p>
           <div className="win-footer">
             <input type="file" accept=".xlsx,.xls,.xlsm" onChange={(e) => onFile(e.target.files?.[0])} aria-label="Escolher planilha" />
             <span className="spacer" />
-            <button className="ghost-btn" onClick={downloadTemplate}>
-              Baixar modelo (.xlsx)
-            </button>
+            <a className="ghost-btn" href="/modelo-concursei.xlsx" download="modelo-concursei.xlsx" style={{ textDecoration: "none" }}>
+              Baixar modelo (.xlsx) com instruções e exemplos
+            </a>
           </div>
           {fileName && <small className="hint">Arquivo: {fileName}</small>}
         </section>

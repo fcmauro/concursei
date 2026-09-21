@@ -225,33 +225,3 @@ export function parsePastedText(text: string): ImportPayload {
   if (empties.length) p.warnings = [`Ignorei ${empties.length} título(s) sem assuntos abaixo: ${empties.slice(0, 5).join(", ")}`];
   return p;
 }
-
-export function downloadTemplate() {
-  const wb = XLSX.utils.book_new();
-  const edital = XLSX.utils.aoa_to_sheet([
-    ["Matéria", "Peso", "Assunto", "Concluído"],
-    ["LÍNGUA PORTUGUESA", 1, "Interpretação de texto", "NÃO"],
-    ["LÍNGUA PORTUGUESA", 1, "Ortografia e acentuação", "NÃO"],
-    ["DIREITO CONSTITUCIONAL", 2, "Direitos e garantias fundamentais", "SIM"],
-  ]);
-  edital["!cols"] = [{ wch: 30 }, { wch: 8 }, { wch: 60 }, { wch: 12 }];
-  const diario = XLSX.utils.aoa_to_sheet([
-    ["Data", "Matéria", "Assunto", "Tipo", "Minutos", "Status", "Questões", "Acertos", "Anotação"],
-    ["2026-10-05", "LÍNGUA PORTUGUESA", "Interpretação de texto", "ESTUDO", 120, "A FAZER", 0, 0, ""],
-    ["2026-10-06", "LÍNGUA PORTUGUESA", "Interpretação de texto", "REVISÃO 24H", 20, "A FAZER", 0, 0, ""],
-  ]);
-  diario["!cols"] = [{ wch: 12 }, { wch: 30 }, { wch: 40 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 30 }];
-  const help = XLSX.utils.aoa_to_sheet([
-    ["Como preencher"],
-    ["Aba Edital: uma linha por assunto. Peso de 1 a 10 (repita o mesmo peso nas linhas da matéria). Concluído: SIM ou NÃO."],
-    ["Aba Diário (opcional): Data no formato AAAA-MM-DD ou DD/MM/AAAA."],
-    ["Tipo: ESTUDO, SIMULADO, REVISÃO 24H, REVISÃO 7 DIAS, REVISÃO 15 DIAS ou REVISÃO 30 DIAS."],
-    ["Status: A FAZER, FEITO ou ADIADO. Matérias e assuntos que não existirem são criados automaticamente."],
-    ["Importar de novo o mesmo arquivo não duplica nada."],
-  ]);
-  help["!cols"] = [{ wch: 120 }];
-  XLSX.utils.book_append_sheet(wb, edital, "Edital");
-  XLSX.utils.book_append_sheet(wb, diario, "Diário");
-  XLSX.utils.book_append_sheet(wb, help, "Como preencher");
-  XLSX.writeFile(wb, "modelo-concursei.xlsx");
-}
