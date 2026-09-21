@@ -59,15 +59,44 @@ const num = (v: unknown, fallback: number | null = 0) => {
 
 class Rollback extends Error {}
 
+const isRealDate = (s: string) => {
+  if (!DATE_RE.test(s)) return false;
+  const t = Date.parse(s + "T12:00:00Z");
+  return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === s;
+};
+const isPlainObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+
 export function validateImport(data: ImportData) {
-  const sessions = data.sessions || [];
-  const subjectCount = Object.keys(data.subjects || {}).length;
-  const topicCount = Object.values(data.subjects || {}).reduce((a, t) => a + (Array.isArray(t) ? t.length : 0), 0);
-  if (sessions.length > 5000 || subjectCount > 100 || topicCount > 4000) return "Arquivo grande demais (máx.: 5000 sessões, 100 matérias, 4000 assuntos)";
-  for (const s of sessions) {
-    if (typeof s.date !== "string" || !DATE_RE.test(s.date)) return `Data inválida em uma sessão: ${JSON.stringify(s.date)}`;
-    if (!clean(s.subject)) return "Há sessão sem matéria";
-    if (!TYPE[clean(s.type).toUpperCase()]) return `Tipo de sessão desconhecido: "${clean(s.type)}"`;
+  if (!isPlainObject(data)) return "Conteúdo inválido";
+  const { subjects, weights, done, sessions } = data as Record<string, unknown>;
+
+  if (subjects !== undefined) {
+    if (!isPlainObject(subjects)) return "subjects deve ser um objeto { matéria: [assuntos] }";
+    if (Object.keys(subjects).length > 100) return "Muitas matérias (máx. 100)";
+    let topics = 0;
+    for (const [name, list] of Object.entries(subjects)) {
+      if (!clean(name)) return "Há matéria sem nome";
+      if (!Array.isArray(list) || list.some((t) => typeof t !== "string")) return `Os assuntos de "${name}" devem ser uma lista de textos`;
+      topics += list.length;
+    }
+    if (topics > 4000) return "Muitos assuntos (máx. 4000)";
+  }
+  if (weights !== undefined) {
+    if (!isPlainObject(weights)) return "weights deve ser um objeto { matéria: peso }";
+    for (const [name, w] of Object.entries(weights)) if (typeof w !== "number" || !Number.isFinite(w)) return `Peso inválido para "${name}"`;
+  }
+  if (done !== undefined && (!Array.isArray(done) || done.some((k) => typeof k !== "string" || !k.includes("|")))) {
+    return "done deve ser uma lista de textos no formato MATÉRIA|assunto";
+  }
+  if (sessions !== undefined) {
+    if (!Array.isArray(sessions)) return "sessions deve ser uma lista";
+    if (sessions.length > 5000) return "Muitas sessões (máx. 5000)";
+    for (const s of sessions as ImportSession[]) {
+      if (!isPlainObject(s)) return "Sessão inválida";
+      if (typeof s.date !== "string" || !isRealDate(s.date)) return `Data inválida em uma sessão: ${JSON.stringify(s.date)}`;
+      if (typeof s.subject !== "string" || !clean(s.subject)) return "Há sessão sem matéria";
+      if (typeof s.type !== "string" || !TYPE[clean(s.type).toUpperCase()]) return `Tipo de sessão desconhecido: "${clean(s.type)}"`;
+    }
   }
   return null;
 }
@@ -132,7 +161,9 @@ export function importData(userId: string, data: ImportData, dryRun = false): Im
     const rows = [...(data.sessions || [])].sort(
       (a, b) => (TYPE[clean(a.type).toUpperCase()]?.type === "ESTUDO" ? 0 : 1) - (TYPE[clean(b.type).toUpperCase()]?.type === "ESTUDO" ? 0 : 1) || a.date.localeCompare(b.date)
     );
-    const exists = db.prepare("SELECT id FROM sessions WHERE user_id = ? AND date = ? AND type = ? AND subject_id = ? AND COALESCE(topic_id, '') = ?");
+    const exists = db.prepare(
+      "SELECT id FROM sessions WHERE user_id = ? AND date = ? AND type = ? AND subject_id = ? AND COALESCE(topic_id, '') = ? AND (? = '' OR COALESCE(note, '') = ?)"
+    );
     const insert = db.prepare(
       `INSERT INTO sessions (id, user_id, subject_id, topic_id, date, type, status, minutes, questions, correct, note, origin_session_id, auto)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)`
@@ -143,7 +174,9 @@ export function importData(userId: string, data: ImportData, dryRun = false): Im
       const isSimulado = map.type === "SIMULADO";
       const sid = ensureSubject(r.subject);
       const tid = isSimulado || !clean(r.topic) ? null : ensureTopic(r.subject, r.topic as string);
-      const dup = exists.get(userId, r.date, map.type, sid, tid || "") as { id: string } | undefined;
+      const noteText = clean(r.note, 2000) || (isSimulado ? clean(r.topic, 300) : "");
+      const noteKey = tid ? "" : noteText;
+      const dup = exists.get(userId, r.date, map.type, sid, tid || "", noteKey, noteKey) as { id: string } | undefined;
       if (dup) {
         if (map.type === "ESTUDO" && tid) studyByKey.set(`${sid}|${tid}|${r.date}`, dup.id);
         stats.sessionsSkipped++;
@@ -158,7 +191,7 @@ export function importData(userId: string, data: ImportData, dryRun = false): Im
       const status = STATUS[clean(r.status).toUpperCase()] || "TODO";
       const questions = num(r.questions);
       const correct = Math.min(num(r.correct) ?? 0, questions ?? 0);
-      const note = clean(r.note, 2000) || (isSimulado ? clean(r.topic, 300) : "") || null;
+      const note = noteText || null;
       insert.run(id, userId, sid, tid, r.date, map.type, status, num(r.minutes, map.minutes), questions, correct, note, origin);
       if (map.type === "ESTUDO" && tid) studyByKey.set(`${sid}|${tid}|${r.date}`, id);
       stats.sessionsCreated++;

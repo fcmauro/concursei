@@ -67,20 +67,30 @@ function Evolution({ byDay }: { byDay: Map<string, { q: number; c: number }> }) 
 export default function Historico() {
   const [rows, setRows] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const load = () =>
-    api.getDoneSessions().then((r) => {
-      setRows(r);
-      setLoading(false);
-    });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let alive = true;
+    const load = () =>
+      api
+        .getDoneSessions()
+        .then((r) => {
+          if (!alive) return;
+          setRows(r);
+          setError(null);
+        })
+        .catch((e: Error) => alive && setError(e.message))
+        .finally(() => alive && setLoading(false));
     load();
     window.addEventListener("concursei:sessions", load);
-    return () => window.removeEventListener("concursei:sessions", load);
+    return () => {
+      alive = false;
+      window.removeEventListener("concursei:sessions", load);
+    };
   }, []);
 
   if (loading) return <p className="loading">Carregando...</p>;
+  if (error) return <div className="error">Não foi possível carregar o histórico: {error}</div>;
 
   const totalMin = rows.reduce((a, s) => a + s.minutes, 0);
   const totalQ = rows.reduce((a, s) => a + s.questions, 0);

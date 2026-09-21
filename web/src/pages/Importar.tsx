@@ -26,7 +26,8 @@ export default function Importar() {
     setResult(null);
     try {
       if (!Object.keys(p.subjects).length && !p.sessions.length) throw new Error("Não encontrei matérias nem sessões nesse conteúdo.");
-      setPreview((await api.importData({ ...p, dryRun: true })).stats);
+      const { warnings: _w, ...body } = p;
+      setPreview((await api.importData({ ...body, dryRun: true })).stats);
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -59,7 +60,8 @@ export default function Importar() {
     setBusy(true);
     setError(null);
     try {
-      const r = await api.importData({ ...payload, dryRun: false });
+      const { warnings: _w, ...body } = payload;
+      const r = await api.importData({ ...body, dryRun: false });
       setResult(r.stats);
       setPreview(null);
       window.dispatchEvent(new Event("concursei:sessions"));
@@ -132,6 +134,11 @@ export default function Importar() {
       )}
 
       {error && <div className="error">{error}</div>}
+      {payload?.warnings?.map((w) => (
+        <p key={w} className="hint">
+          {w}
+        </p>
+      ))}
 
       {payload && (
         <section className="panel">

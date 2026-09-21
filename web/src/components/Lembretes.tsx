@@ -22,16 +22,20 @@ export default function Lembretes() {
       const now = new Date();
       const day = localISO(now);
 
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("concursei.reminders.start.") && !k.startsWith(`concursei.reminders.start.${day}.`)) localStorage.removeItem(k);
+      }
+
       const lastReviews = localStorage.getItem("concursei.reminders.reviews");
       if (lastReviews !== day && now.getHours() >= 7) {
-        localStorage.setItem("concursei.reminders.reviews", day);
         try {
-          const w = { from: day, to: day };
-          const d = await api.getDashboard(day, w.from, w.to);
+          const d = await api.getDashboard(day, day, day);
+          localStorage.setItem("concursei.reminders.reviews", day);
           const n = d.reviews.due + d.reviews.overdue;
           if (n > 0) notify("Revisões pendentes", `Você tem ${n} ${n === 1 ? "revisão" : "revisões"} para fazer (${d.reviews.overdue} atrasadas).`);
         } catch {
-          /* sessão expirada ou API fora do ar */
+          /* sessão expirada ou API fora do ar: tenta de novo no próximo ciclo */
         }
       }
 

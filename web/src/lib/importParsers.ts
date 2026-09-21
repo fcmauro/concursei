@@ -4,6 +4,7 @@ export interface ImportPayload {
   subjects: Record<string, string[]>;
   weights: Record<string, number>;
   done: string[];
+  warnings?: string[];
   sessions: {
     date: string;
     subject: string;
@@ -188,8 +189,10 @@ export async function parseWorkbook(file: File): Promise<ImportPayload> {
 const isHeading = (line: string) => {
   const letters = line.replace(/[^A-Za-zÀ-ÿ]/g, "");
   if (/^(mat[eé]ria|disciplina)\s*[:\-–]/i.test(line)) return true;
-  if (/[:：]\s*$/.test(line) && line.length < 90) return true;
-  return letters.length >= 4 && letters === letters.toUpperCase() && line.length < 90;
+  if (/[:：]\s*$/.test(line) && line.length < 90 && line.split(/\s+/).length <= 8) return true;
+  // MAIÚSCULAS: precisa parecer título (2+ palavras ou nome longo) e não ter números/barras (ex.: "CF/88", "ICMS")
+  const allCaps = letters.length >= 4 && letters === letters.toUpperCase() && line.length < 90 && !/[\d/]/.test(line);
+  return allCaps && (/\s/.test(line.trim()) || letters.length >= 8);
 };
 
 const cleanHeading = (line: string) =>
@@ -217,10 +220,9 @@ export function parsePastedText(text: string): ImportPayload {
     const topic = cleanTopic(line);
     if (topic.length >= 3) add(p, cur, topic);
   }
-  for (const s of Object.keys(p.subjects)) {
-    if (!p.subjects[s].length) delete p.subjects[s];
-    else p.weights[s] = 1;
-  }
+  const empties = Object.keys(p.subjects).filter((s) => !p.subjects[s].length);
+  for (const s of empties) delete p.subjects[s];
+  if (empties.length) p.warnings = [`Ignorei ${empties.length} título(s) sem assuntos abaixo: ${empties.slice(0, 5).join(", ")}`];
   return p;
 }
 
