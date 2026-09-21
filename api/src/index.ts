@@ -9,6 +9,7 @@ import meRoutes from "./routes/me";
 import scheduleRoutes from "./routes/schedule";
 import simuladoRoutes from "./routes/simulados";
 import errorRoutes from "./routes/errors";
+import planRoutes from "./routes/plan";
 
 const app = express();
 app.set("trust proxy", true);
@@ -25,6 +26,7 @@ app.use("/me", meRoutes);
 app.use("/schedule", scheduleRoutes);
 app.use("/simulados", simuladoRoutes);
 app.use("/errors", errorRoutes);
+app.use("/plan", planRoutes);
 
 const PORT = Number(process.env.PORT || 4000);
 app.listen(PORT, () => {

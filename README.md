@@ -61,6 +61,9 @@ sobrevivem a rebuilds/restarts dos containers.
 - **Revisões**: 24h / 7 / 15 / 30 dias geradas ao concluir um assunto (programadas,
   atrasadas, concluídas, ignoradas).
 - **Cronômetro**: botão flutuante que registra a sessão (tempo, questões, acertos).
+- **Plano**: gera o Diário inteiro até uma data-alvo (assuntos por peso e intercalados,
+  revisões 24h/7/15/30, simulados quinzenais), respeitando horários e compromissos. É um
+  algoritmo determinístico, sem IA; "substituir" refaz só o que foi gerado automaticamente.
 - **Rotina**: janelas de estudo por dia da semana e compromissos fora do estudo.
 - **Edital**: matérias e assuntos editáveis, conclusão manual, desempenho por assunto.
 - **Simulados** e **Caderno de erros** (com padrão dos motivos de erro).
@@ -73,7 +76,6 @@ pesos e assuntos das contas criadas a partir do modelo MPMS.
 ## Próximos passos possíveis
 
 - Importar edital por Excel ou colando texto/PDF (estruturado por IA).
-- Gerador de agenda ("replanejar") a partir de pesos e janelas de estudo.
 - Grade com horário de início nos cards do Diário.
 - Lembretes (notificação/e-mail), vários concursos por conta, conquistas, modo escuro.
 - Trocar SQLite por Postgres quando o número de usuários crescer.

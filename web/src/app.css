@@ -300,3 +300,19 @@ textarea { width: 100%; border: 1px solid var(--line); border-radius: 9px; paddi
 .erro-foot { display: flex; align-items: center; gap: 8px; }
 .table-scroll { overflow-x: auto; }
 @media (max-width: 760px) { .win-row { grid-template-columns: 1fr; } .reason-bar { grid-template-columns: 110px 1fr 24px; } }
+
+.plano-page { display: grid; gap: 18px; animation: rise .45s ease both; }
+.plano-page h2 { margin: 0 0 4px; font-size: 26px; }
+.quick-grid { display: grid; gap: 10px; }
+.quick-row { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.quick-row strong { min-width: 130px; align-self: center; }
+.quick-row label { width: 130px; }
+.ok-text { color: var(--accent-2); font-weight: 700; }
+.sample-list { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; }
+.sample-day { display: grid; grid-template-columns: 70px 1fr; gap: 10px; align-items: start; font-size: 12px; }
+.sample-day > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.sample-chip { display: inline-flex; align-items: baseline; gap: 6px; padding: 5px 9px; border: 1px solid var(--line); border-left: 4px solid; border-radius: 8px; background: #fff; }
+.sample-chip em { color: var(--muted); font-size: 11px; font-style: normal; }
+.app-header nav { min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.app-header nav a { white-space: nowrap; padding: 0 11px; }
+a.primary { display: inline-block; color: #fff; }

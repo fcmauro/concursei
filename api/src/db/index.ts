@@ -19,6 +19,9 @@ for (const [col, ddl] of [
 ] as const) {
   if (!userCols.some((c) => c.name === col)) db.exec(ddl);
 }
+const sessionCols = db.prepare("PRAGMA table_info(sessions)").all() as { name: string }[];
+if (!sessionCols.some((c) => c.name === "auto")) db.exec("ALTER TABLE sessions ADD COLUMN auto INTEGER NOT NULL DEFAULT 0");
+
 const topicCols = db.prepare("PRAGMA table_info(topics)").all() as { name: string }[];
 if (!topicCols.some((c) => c.name === "done")) db.exec("ALTER TABLE topics ADD COLUMN done INTEGER NOT NULL DEFAULT 0");
 

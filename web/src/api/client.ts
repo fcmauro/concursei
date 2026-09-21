@@ -51,6 +51,8 @@ export const api = {
   patchError: (id: string, payload: Record<string, unknown>) => request(`/errors/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
   deleteError: (id: string) => request(`/errors/${id}`, { method: "DELETE" }),
 
+  generatePlan: (payload: Record<string, unknown>) => request("/plan", { method: "POST", body: JSON.stringify(payload) }),
+
   getMe: () => request("/me"),
   updateMe: (payload: Record<string, unknown>) => request("/me", { method: "PATCH", body: JSON.stringify(payload) }),
   getDashboard: (today: string, from: string, to: string) => request(`/stats/dashboard?today=${today}&from=${from}&to=${to}`),

@@ -11,6 +11,7 @@ import Cronometro from "./components/Cronometro";
 import Rotina from "./pages/Rotina";
 import Simulados from "./pages/Simulados";
 import Erros from "./pages/Erros";
+import Plano from "./pages/Plano";
 import "./app.css";
 
 function PrivateLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,9 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
           </NavLink>
           <NavLink to="/board" className={({ isActive }) => (isActive ? "active" : "")}>
             Diário
+          </NavLink>
+          <NavLink to="/plano" className={({ isActive }) => (isActive ? "active" : "")}>
+            Plano
           </NavLink>
           <NavLink to="/revisoes" className={({ isActive }) => (isActive ? "active" : "")}>
             Revisões
@@ -136,6 +140,14 @@ export default function App() {
             element={
               <PrivateLayout>
                 <Erros />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/plano"
+            element={
+              <PrivateLayout>
+                <Plano />
               </PrivateLayout>
             }
           />
