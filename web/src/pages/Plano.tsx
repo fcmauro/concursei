@@ -24,6 +24,7 @@ export default function Plano() {
   const [until, setUntil] = useState(addDaysISO(today, 84));
   const [examDate, setExamDate] = useState<string | null>(null);
   const [setAsExam, setSetAsExam] = useState(false);
+  const [prepDate, setPrepDate] = useState<string | null>(null);
   const [replace, setReplace] = useState(true);
   const [preview, setPreview] = useState<any | null>(null);
   const [busy, setBusy] = useState(false);
@@ -48,7 +49,10 @@ export default function Plano() {
       }, 0)
     );
     setExamDate(me.examDate);
-    if (me.examDate && me.examDate > today) setUntil(me.examDate);
+    setPrepDate(me.prepDate);
+    const known = me.examDate || me.prepDate;
+    if (known && known > today) setUntil(known);
+    setSetAsExam(!known);
     setLoading(false);
   }
 
@@ -79,8 +83,13 @@ export default function Plano() {
       setPreview(r);
       if (apply) {
         if (setAsExam) {
-          await api.updateMe({ examDate: until });
-          setExamDate(until);
+          if (examDate) {
+            await api.updateMe({ examDate: until });
+            setExamDate(until);
+          } else {
+            await api.updateMe({ prepDate: until });
+            setPrepDate(until);
+          }
         }
         setDone(`${r.created} sessões criadas no Diário.`);
         window.dispatchEvent(new Event("concursei:sessions"));
@@ -171,6 +180,7 @@ export default function Plano() {
 
       <section className="panel">
         <h3>2. Até quando?</h3>
+        {!examDate && <p className="hint" style={{ margin: 0 }}>Sem data de prova? Escolha uma data-alvo de preparação (ex.: 12 semanas) e refaça o plano quando o edital sair.</p>}
         <div className="event-form">
           <label>
             Data-alvo (prova ou fim do plano)
@@ -184,7 +194,9 @@ export default function Plano() {
         </div>
         <label className="inline-check">
           <input type="checkbox" checked={setAsExam} onChange={(e) => setSetAsExam(e.target.checked)} />
-          usar esta data como data da prova {examDate ? `(hoje: ${new Date(examDate + "T00:00:00").toLocaleDateString("pt-BR")})` : ""}
+          {examDate
+            ? `usar esta data como data da prova (hoje: ${new Date(examDate + "T00:00:00").toLocaleDateString("pt-BR")})`
+            : `guardar como data-alvo da preparação, já que a prova ainda não tem data${prepDate ? ` (hoje: ${new Date(prepDate + "T00:00:00").toLocaleDateString("pt-BR")})` : ""}`}
         </label>
         <label className="inline-check">
           <input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} />

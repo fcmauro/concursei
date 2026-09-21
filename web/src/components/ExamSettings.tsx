@@ -5,6 +5,7 @@ import { api } from "../api/client";
 export interface MeData {
   examName: string | null;
   examDate: string | null;
+  prepDate: string | null;
   goalHoursWeek: number;
   goalQuestionsWeek: number;
 }
@@ -20,6 +21,7 @@ export default function ExamSettings({
 }) {
   const [examName, setExamName] = useState(initial.examName || "");
   const [examDate, setExamDate] = useState(initial.examDate || "");
+  const [prepDate, setPrepDate] = useState(initial.prepDate || "");
   const [hours, setHours] = useState(initial.goalHoursWeek);
   const [questions, setQuestions] = useState(initial.goalQuestionsWeek);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function ExamSettings({
   async function save() {
     setError(null);
     try {
-      const me = await api.updateMe({ examName, examDate: examDate || null, goalHoursWeek: hours, goalQuestionsWeek: questions });
+      const me = await api.updateMe({ examName, examDate: examDate || null, prepDate: prepDate || null, goalHoursWeek: hours, goalQuestionsWeek: questions });
       onSaved(me);
     } catch (e: any) {
       setError(e.message);
@@ -52,6 +54,13 @@ export default function ExamSettings({
           Data da prova
           <input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
         </label>
+        <label>
+          Data-alvo da preparação (se a prova ainda não tem data)
+          <input type="date" value={prepDate} onChange={(e) => setPrepDate(e.target.value)} />
+        </label>
+        <p className="hint" style={{ marginTop: -6 }}>
+          Enquanto a data da prova não sai, o Painel conta os dias até esta data. Quando você preencher a data da prova, ela passa a valer.
+        </p>
         <div className="sm-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
           <label>
             Meta de horas por semana

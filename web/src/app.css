@@ -316,3 +316,4 @@ textarea { width: 100%; border: 1px solid var(--line); border-radius: 9px; paddi
 .app-header nav { min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .app-header nav a { white-space: nowrap; padding: 0 11px; }
 a.primary { display: inline-block; color: #fff; }
+.countdown em { margin-top: 2px; font-size: 10px; font-style: normal; opacity: .85; }

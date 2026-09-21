@@ -34,7 +34,9 @@ export default function Painel() {
 
   if (!data) return <p className="loading">Carregando...</p>;
 
-  const left = data.examDate ? daysUntil(data.examDate) : null;
+  const isPrep = !data.examDate && !!data.prepDate;
+  const target = data.examDate || data.prepDate;
+  const left = target ? daysUntil(target) : null;
   const desemp = pct(data.totalCorrect, data.totalQuestions);
   const progress = pct(data.topics.mastered, data.topics.total);
   const goalMin = data.goals.hoursWeek * 60;
@@ -47,6 +49,7 @@ export default function Painel() {
   const me: MeData = {
     examName: data.examName,
     examDate: data.examDate,
+    prepDate: data.prepDate,
     goalHoursWeek: data.goals.hoursWeek,
     goalQuestionsWeek: data.goals.questionsWeek,
   };
@@ -65,14 +68,17 @@ export default function Painel() {
         </div>
         <button className={`countdown ${left === null ? "empty" : ""}`} onClick={() => setSettings(true)}>
           {left === null ? (
-            <span>Definir data da prova</span>
+            <span>Definir data da prova ou da preparação</span>
           ) : left >= 0 ? (
             <>
               <strong>{left}</strong>
-              <span>{left === 1 ? "dia para a prova" : "dias para a prova"}</span>
+              <span>
+                {isPrep ? (left === 1 ? "dia de preparação" : "dias de preparação") : left === 1 ? "dia para a prova" : "dias para a prova"}
+              </span>
+              {isPrep && <em>prova ainda sem data</em>}
             </>
           ) : (
-            <span>Prova já realizada</span>
+            <span>{isPrep ? "Preparação encerrada" : "Prova já realizada"}</span>
           )}
         </button>
       </div>
