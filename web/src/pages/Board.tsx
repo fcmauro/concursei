@@ -89,7 +89,12 @@ export default function Board() {
 
   async function handleDelete(id: string) {
     if (!window.confirm("Remover esta sessão?")) return;
-    await api.deleteSession(id);
+    try {
+      await api.deleteSession(id);
+    } catch (e: any) {
+      window.alert(`Não foi possível remover: ${e.message}`);
+      return;
+    }
     setSessions((prev) => prev.filter((s) => s.id !== id));
     setBacklog((prev) => prev.filter((s) => s.id !== id));
     setSelectedId(null);

@@ -9,7 +9,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function readUser(id: string) {
   const u = db
-    .prepare("SELECT id, email, name, exam_name, exam_date, goal_hours_week, goal_questions_week FROM users WHERE id = ?")
+    .prepare("SELECT id, email, name, exam_name, exam_date, prep_date, goal_hours_week, goal_questions_week FROM users WHERE id = ?")
     .get(id) as any;
   return {
     id: u.id,
@@ -17,6 +17,7 @@ function readUser(id: string) {
     name: u.name,
     examName: u.exam_name,
     examDate: u.exam_date,
+    prepDate: u.prep_date,
     goalHoursWeek: u.goal_hours_week,
     goalQuestionsWeek: u.goal_questions_week,
   };
@@ -27,7 +28,7 @@ router.get("/", (req: AuthedRequest, res) => {
 });
 
 router.patch("/", (req: AuthedRequest, res) => {
-  const { examName, examDate, goalHoursWeek, goalQuestionsWeek } = req.body || {};
+  const { examName, examDate, prepDate, goalHoursWeek, goalQuestionsWeek } = req.body || {};
   const fields: string[] = [];
   const params: any[] = [];
 
@@ -41,6 +42,13 @@ router.patch("/", (req: AuthedRequest, res) => {
     }
     fields.push("exam_date = ?");
     params.push(examDate || null);
+  }
+  if (prepDate !== undefined) {
+    if (prepDate !== null && prepDate !== "" && !DATE_RE.test(prepDate)) {
+      return res.status(400).json({ error: "prepDate inválida (use AAAA-MM-DD)" });
+    }
+    fields.push("prep_date = ?");
+    params.push(prepDate || null);
   }
   if (goalHoursWeek !== undefined) {
     const n = Number(goalHoursWeek);

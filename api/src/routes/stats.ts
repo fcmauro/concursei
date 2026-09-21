@@ -171,7 +171,7 @@ router.get("/dashboard", (req: AuthedRequest, res) => {
     ).c;
 
   const user = db
-    .prepare("SELECT exam_name, exam_date, goal_hours_week, goal_questions_week FROM users WHERE id = ?")
+    .prepare("SELECT exam_name, exam_date, prep_date, goal_hours_week, goal_questions_week FROM users WHERE id = ?")
     .get(uid) as any;
 
   res.json({
@@ -187,6 +187,7 @@ router.get("/dashboard", (req: AuthedRequest, res) => {
     goals: { hoursWeek: user.goal_hours_week, questionsWeek: user.goal_questions_week },
     examName: user.exam_name,
     examDate: user.exam_date,
+    prepDate: user.prep_date,
   });
 });
 

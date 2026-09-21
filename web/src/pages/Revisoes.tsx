@@ -118,7 +118,12 @@ export default function Revisoes() {
           onMove={(id: string, date: string) => update(id, { date, status: "TODO" })}
           onDelete={async (id: string) => {
             if (!window.confirm("Remover esta revisão?")) return;
-            await api.deleteSession(id);
+            try {
+              await api.deleteSession(id);
+            } catch (e: any) {
+              window.alert(`Não foi possível remover: ${e.message}`);
+              return;
+            }
             setSelectedId(null);
             await load();
           }}

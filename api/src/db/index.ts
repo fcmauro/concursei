@@ -14,6 +14,7 @@ db.exec(schema);
 const userCols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
 for (const [col, ddl] of [
   ["exam_date", "ALTER TABLE users ADD COLUMN exam_date TEXT"],
+  ["prep_date", "ALTER TABLE users ADD COLUMN prep_date TEXT"],
   ["goal_hours_week", "ALTER TABLE users ADD COLUMN goal_hours_week INTEGER NOT NULL DEFAULT 18"],
   ["goal_questions_week", "ALTER TABLE users ADD COLUMN goal_questions_week INTEGER NOT NULL DEFAULT 0"],
 ] as const) {

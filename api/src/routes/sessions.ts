@@ -162,7 +162,10 @@ router.delete("/:id", (req: AuthedRequest, res) => {
     .prepare("SELECT id FROM sessions WHERE id = ? AND user_id = ?")
     .get(req.params.id, req.userId!);
   if (!existing) return res.status(404).json({ error: "Sessão não encontrada" });
-  db.prepare("DELETE FROM sessions WHERE id = ?").run(req.params.id);
+  db.transaction(() => {
+    db.prepare("UPDATE sessions SET origin_session_id = NULL WHERE origin_session_id = ?").run(req.params.id);
+    db.prepare("DELETE FROM sessions WHERE id = ?").run(req.params.id);
+  })();
   res.status(204).end();
 });
 

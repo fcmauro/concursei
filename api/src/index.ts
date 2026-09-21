@@ -28,6 +28,11 @@ app.use("/simulados", simuladoRoutes);
 app.use("/errors", errorRoutes);
 app.use("/plan", planRoutes);
 
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error(err);
+  res.status(500).json({ error: "Erro interno do servidor" });
+});
+
 const PORT = Number(process.env.PORT || 4000);
 app.listen(PORT, () => {
   console.log(`API rodando em http://localhost:${PORT}`);
