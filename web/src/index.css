@@ -1,1 +1,32 @@
-html, body, #root { height: 100%; margin: 0; }
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #e8eefc;
+  background: #080b14;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --bg: #080b14;
+  --panel: #101522;
+  --panel-2: #151b2b;
+  --line: rgba(148, 163, 184, .14);
+  --muted: #8d99b2;
+  --text: #f3f6ff;
+  --accent: #8b7cff;
+  --accent-2: #4dd4b2;
+  --danger: #ff7c9d;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; margin: 0; }
+body { min-width: 320px; background: radial-gradient(circle at 70% -10%, rgba(116, 91, 255, .18), transparent 35%), var(--bg); }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+h1, h2, h3, strong, .app-title { font-family: 'Space Grotesk', sans-serif; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #2b3550; border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+@media (max-width: 760px) { body { font-size: 14px; } }
