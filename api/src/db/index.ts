@@ -19,6 +19,9 @@ for (const [col, ddl] of [
 ] as const) {
   if (!userCols.some((c) => c.name === col)) db.exec(ddl);
 }
+const topicCols = db.prepare("PRAGMA table_info(topics)").all() as { name: string }[];
+if (!topicCols.some((c) => c.name === "done")) db.exec("ALTER TABLE topics ADD COLUMN done INTEGER NOT NULL DEFAULT 0");
+
 if (!userCols.some((c) => c.name === "exam_name")) {
   db.exec("ALTER TABLE users ADD COLUMN exam_name TEXT");
   db.exec("UPDATE users SET exam_name = 'MPMS — Analista TI / Desenvolvimento de Sistemas'");

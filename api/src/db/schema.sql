@@ -45,3 +45,58 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE INDEX IF NOT EXISTS idx_sessions_user_date ON sessions(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_sessions_topic ON sessions(topic_id);
+
+-- janelas de estudo por dia da semana (0 = domingo ... 6 = sábado), horários HH:MM
+CREATE TABLE IF NOT EXISTS availability (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  weekday INTEGER NOT NULL,
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_availability_user ON availability(user_id);
+
+-- compromissos fora do estudo: pontuais (date) ou semanais (weekday)
+CREATE TABLE IF NOT EXISTS events (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  title TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'Outro',
+  date TEXT,
+  weekday INTEGER,
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id);
+
+CREATE TABLE IF NOT EXISTS simulados (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  date TEXT NOT NULL,
+  title TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'MULTIPLA',
+  duration_min INTEGER NOT NULL DEFAULT 0,
+  total INTEGER NOT NULL DEFAULT 0,
+  correct INTEGER NOT NULL DEFAULT 0,
+  blank INTEGER NOT NULL DEFAULT 0,
+  wrong INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_simulados_user ON simulados(user_id, date);
+
+-- reason: DESATENCAO | DESCONHECIMENTO | ESQUECIMENTO
+CREATE TABLE IF NOT EXISTS errors (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  subject_id TEXT NOT NULL REFERENCES subjects(id),
+  topic_id TEXT REFERENCES topics(id),
+  source TEXT,
+  studied_at TEXT,
+  repeat_at TEXT,
+  reason TEXT NOT NULL,
+  correct_reasoning TEXT,
+  reviewed INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_errors_user ON errors(user_id);

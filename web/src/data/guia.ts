@@ -30,7 +30,7 @@ export const PASSOS_APP: Passo[] = [
   {
     titulo: "2. Planeje a semana no Diário",
     texto:
-      "Cada dia é uma coluna. Clique em + adicionar, escolha matéria e assunto. Não deu tempo? Arraste o card para outro dia — a data muda sozinha, sem duplicar nada.",
+      "Defina seus horários de estudo e compromissos na aba Rotina; cada dia do Diário mostra quanto tempo ainda cabe. Cada dia é uma coluna. Clique em + adicionar, escolha matéria e assunto. Não deu tempo? Arraste o card para outro dia — a data muda sozinha, sem duplicar nada.",
   },
   {
     titulo: "3. Conclua informando questões",
@@ -45,7 +45,7 @@ export const PASSOS_APP: Passo[] = [
   {
     titulo: "5. Confira as Horas uma vez por semana",
     texto:
-      "A aba Horas divide o tempo disponível entre as matérias de acordo com o peso (hoje o cálculo usa 18 h/semana) e compara com as horas lançadas no Diário. Reequilibre a semana seguinte se alguma matéria ficou para trás.",
+      "A aba Horas divide o tempo disponível entre as matérias de acordo com o peso (a meta de horas vem do Painel ou da aba Rotina) e compara com as horas lançadas no Diário. Reequilibre a semana seguinte se alguma matéria ficou para trás.",
   },
 ];
 
@@ -97,7 +97,7 @@ export const BLOCOS: Bloco[] = [
   {
     id: "erros",
     titulo: "Caderno de erros",
-    intro: "Ainda não existe no app: por enquanto use papel, planilha ou Notion, e revise os erros junto com as revisões do Diário.",
+    intro: "Use a aba Erros do app: escolha matéria e assunto, classifique o motivo e escreva o fundamento com suas palavras. O gráfico de padrão mostra onde você mais erra.",
     itens: [
       "Registre: matéria/assunto, banca/ano/órgão, data estudada, data para repetir, motivo do erro e o fundamento da resposta certa com suas palavras.",
       "Classifique o motivo: desatenção, desconhecimento ou esquecimento. Se for sempre desatenção, o problema é ritmo de prova, não teoria.",

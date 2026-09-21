@@ -156,7 +156,10 @@ router.get("/dashboard", (req: AuthedRequest, res) => {
   ).c;
   const topicsMastered = (
     db
-      .prepare("SELECT COUNT(DISTINCT topic_id) c FROM sessions WHERE user_id = ? AND status = 'DONE' AND topic_id IS NOT NULL")
+      .prepare(
+        `SELECT COUNT(*) c FROM topics t JOIN subjects s ON s.id = t.subject_id
+         WHERE s.user_id = ? AND (t.done = 1 OR EXISTS (SELECT 1 FROM sessions x WHERE x.topic_id = t.id AND x.status = 'DONE'))`
+      )
       .get(uid) as any
   ).c;
 

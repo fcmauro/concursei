@@ -8,6 +8,9 @@ import Guia from "./pages/Guia";
 import Painel from "./pages/Painel";
 import Revisoes from "./pages/Revisoes";
 import Cronometro from "./components/Cronometro";
+import Rotina from "./pages/Rotina";
+import Simulados from "./pages/Simulados";
+import Erros from "./pages/Erros";
 import "./app.css";
 
 function PrivateLayout({ children }: { children: React.ReactNode }) {
@@ -27,8 +30,17 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
           <NavLink to="/revisoes" className={({ isActive }) => (isActive ? "active" : "")}>
             Revisões
           </NavLink>
+          <NavLink to="/rotina" className={({ isActive }) => (isActive ? "active" : "")}>
+            Rotina
+          </NavLink>
           <NavLink to="/edital" className={({ isActive }) => (isActive ? "active" : "")}>
             Edital
+          </NavLink>
+          <NavLink to="/simulados" className={({ isActive }) => (isActive ? "active" : "")}>
+            Simulados
+          </NavLink>
+          <NavLink to="/erros" className={({ isActive }) => (isActive ? "active" : "")}>
+            Erros
           </NavLink>
           <NavLink to="/stats" className={({ isActive }) => (isActive ? "active" : "")}>
             Horas
@@ -100,6 +112,30 @@ export default function App() {
             element={
               <PrivateLayout>
                 <Guia />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/rotina"
+            element={
+              <PrivateLayout>
+                <Rotina />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/simulados"
+            element={
+              <PrivateLayout>
+                <Simulados />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/erros"
+            element={
+              <PrivateLayout>
+                <Erros />
               </PrivateLayout>
             }
           />

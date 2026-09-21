@@ -6,6 +6,9 @@ import subjectRoutes from "./routes/subjects";
 import sessionRoutes from "./routes/sessions";
 import statsRoutes from "./routes/stats";
 import meRoutes from "./routes/me";
+import scheduleRoutes from "./routes/schedule";
+import simuladoRoutes from "./routes/simulados";
+import errorRoutes from "./routes/errors";
 
 const app = express();
 app.set("trust proxy", true);
@@ -19,6 +22,9 @@ app.use("/subjects", subjectRoutes);
 app.use("/sessions", sessionRoutes);
 app.use("/stats", statsRoutes);
 app.use("/me", meRoutes);
+app.use("/schedule", scheduleRoutes);
+app.use("/simulados", simuladoRoutes);
+app.use("/errors", errorRoutes);
 
 const PORT = Number(process.env.PORT || 4000);
 app.listen(PORT, () => {

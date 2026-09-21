@@ -23,6 +23,8 @@ export default function Board() {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [backlog, setBacklog] = useState<SessionRow[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
+  const [avail, setAvail] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [modalDate, setModalDate] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,15 @@ export default function Board() {
   });
 
   const load = useCallback(async () => {
-    const [s, b, subj] = await Promise.all([api.getSessions(days[0], days[6]), api.getBacklog(), api.getSubjects()]);
+    const [s, b, subj, av, ev] = await Promise.all([
+      api.getSessions(days[0], days[6]),
+      api.getBacklog(),
+      api.getSubjects(),
+      api.getAvailability(),
+      api.getEvents(days[0], days[6]),
+    ]);
+    setAvail(av);
+    setEvents(ev);
     setSessions(s.filter((x: SessionRow) => x.status !== "POSTPONED"));
     setBacklog(b);
     setSubjects(subj);
@@ -129,6 +139,8 @@ export default function Board() {
                 key={date}
                 date={date}
                 sessions={sessions.filter((s) => s.date === date)}
+                windows={avail.filter((w) => w.weekday === new Date(date + "T00:00:00").getDay())}
+                events={events.filter((e) => e.date === date)}
                 onOpen={(s) => setSelectedId(s.id)}
                 onAddClick={setModalDate}
               />

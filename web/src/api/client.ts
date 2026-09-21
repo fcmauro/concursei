@@ -27,6 +27,30 @@ export const api = {
   login: (email: string, password: string) =>
     request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
 
+  getAvailability: () => request("/schedule/availability"),
+  saveAvailability: (windows: { weekday: number; start: string; end: string }[]) =>
+    request("/schedule/availability", { method: "PUT", body: JSON.stringify({ windows }) }),
+  getEvents: (from: string, to: string) => request(`/schedule/events?from=${from}&to=${to}`),
+  getAllEvents: () => request("/schedule/events"),
+  createEvent: (payload: Record<string, unknown>) => request("/schedule/events", { method: "POST", body: JSON.stringify(payload) }),
+  deleteEvent: (id: string) => request(`/schedule/events/${id}`, { method: "DELETE" }),
+
+  updateSubject: (id: string, payload: Record<string, unknown>) =>
+    request(`/subjects/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteSubject: (id: string) => request(`/subjects/${id}`, { method: "DELETE" }),
+  updateTopic: (id: string, payload: Record<string, unknown>) =>
+    request(`/subjects/topics/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteTopic: (id: string) => request(`/subjects/topics/${id}`, { method: "DELETE" }),
+
+  getSimulados: () => request("/simulados"),
+  createSimulado: (payload: Record<string, unknown>) => request("/simulados", { method: "POST", body: JSON.stringify(payload) }),
+  deleteSimulado: (id: string) => request(`/simulados/${id}`, { method: "DELETE" }),
+
+  getErrors: () => request("/errors"),
+  createError: (payload: Record<string, unknown>) => request("/errors", { method: "POST", body: JSON.stringify(payload) }),
+  patchError: (id: string, payload: Record<string, unknown>) => request(`/errors/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteError: (id: string) => request(`/errors/${id}`, { method: "DELETE" }),
+
   getMe: () => request("/me"),
   updateMe: (payload: Record<string, unknown>) => request("/me", { method: "PATCH", body: JSON.stringify(payload) }),
   getDashboard: (today: string, from: string, to: string) => request(`/stats/dashboard?today=${today}&from=${from}&to=${to}`),
