@@ -67,6 +67,9 @@ sobrevivem a rebuilds/restarts dos containers.
 - **Rotina**: janelas de estudo por dia da semana e compromissos fora do estudo.
 - **Edital**: matérias e assuntos editáveis, conclusão manual, desempenho por assunto.
 - **Simulados** e **Caderno de erros** (com padrão dos motivos de erro).
+- **Histórico** (lista por dia, evolução de 30 dias, tempo por matéria) e **Importar**
+  (planilha Excel com modelo para baixar, ou texto colado do edital; tem prévia e não duplica).
+- **Lembretes** do navegador (início da janela de estudo e revisões do dia).
 - **Horas** (por peso) e **Guia** de estudo com técnicas e links.
 - Cadastro em branco ou a partir de um modelo (MPMS 405 – Analista de TI).
 
@@ -75,7 +78,7 @@ pesos e assuntos das contas criadas a partir do modelo MPMS.
 
 ## Próximos passos possíveis
 
-- Importar edital por Excel ou colando texto/PDF (estruturado por IA).
+- Ler o PDF do edital automaticamente (exige um serviço de IA).
 - Grade com horário de início nos cards do Diário.
-- Lembretes (notificação/e-mail), vários concursos por conta, conquistas, modo escuro.
+- Vários concursos por conta, conquistas, modo escuro, lembretes por e-mail/push.
 - Trocar SQLite por Postgres quando o número de usuários crescer.

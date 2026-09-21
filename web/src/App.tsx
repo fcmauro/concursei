@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, NavLink } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Board from "./pages/Board";
@@ -7,51 +7,76 @@ import Stats from "./pages/Stats";
 import Guia from "./pages/Guia";
 import Painel from "./pages/Painel";
 import Revisoes from "./pages/Revisoes";
-import Cronometro from "./components/Cronometro";
 import Rotina from "./pages/Rotina";
 import Simulados from "./pages/Simulados";
 import Erros from "./pages/Erros";
 import Plano from "./pages/Plano";
+import Historico from "./pages/Historico";
+import Importar from "./pages/Importar";
+import Cronometro from "./components/Cronometro";
+import Lembretes from "./components/Lembretes";
 import "./app.css";
+
+const MAIN_NAV = [
+  { to: "/painel", label: "Painel" },
+  { to: "/board", label: "Diário" },
+  { to: "/plano", label: "Plano" },
+  { to: "/revisoes", label: "Revisões" },
+  { to: "/edital", label: "Edital" },
+];
+
+const MORE_NAV = [
+  { to: "/rotina", label: "Rotina" },
+  { to: "/simulados", label: "Simulados" },
+  { to: "/erros", label: "Caderno de erros" },
+  { to: "/historico", label: "Histórico" },
+  { to: "/stats", label: "Horas por matéria" },
+  { to: "/importar", label: "Importar" },
+  { to: "/guia", label: "Guia de estudo" },
+];
+
+const PAGES: { path: string; element: React.ReactNode }[] = [
+  { path: "/painel", element: <Painel /> },
+  { path: "/board", element: <Board /> },
+  { path: "/plano", element: <Plano /> },
+  { path: "/revisoes", element: <Revisoes /> },
+  { path: "/edital", element: <Edital /> },
+  { path: "/rotina", element: <Rotina /> },
+  { path: "/simulados", element: <Simulados /> },
+  { path: "/erros", element: <Erros /> },
+  { path: "/historico", element: <Historico /> },
+  { path: "/stats", element: <Stats /> },
+  { path: "/importar", element: <Importar /> },
+  { path: "/guia", element: <Guia /> },
+];
+
+const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? "active" : "");
 
 function PrivateLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const location = useLocation();
   if (!user) return <Navigate to="/login" replace />;
+  const moreActive = MORE_NAV.some((m) => location.pathname === m.to);
   return (
     <div className="app-shell">
       <header className="app-header">
         <div className="app-title">Concursei</div>
         <nav>
-          <NavLink to="/painel" className={({ isActive }) => (isActive ? "active" : "")}>
-            Painel
-          </NavLink>
-          <NavLink to="/board" className={({ isActive }) => (isActive ? "active" : "")}>
-            Diário
-          </NavLink>
-          <NavLink to="/plano" className={({ isActive }) => (isActive ? "active" : "")}>
-            Plano
-          </NavLink>
-          <NavLink to="/revisoes" className={({ isActive }) => (isActive ? "active" : "")}>
-            Revisões
-          </NavLink>
-          <NavLink to="/rotina" className={({ isActive }) => (isActive ? "active" : "")}>
-            Rotina
-          </NavLink>
-          <NavLink to="/edital" className={({ isActive }) => (isActive ? "active" : "")}>
-            Edital
-          </NavLink>
-          <NavLink to="/simulados" className={({ isActive }) => (isActive ? "active" : "")}>
-            Simulados
-          </NavLink>
-          <NavLink to="/erros" className={({ isActive }) => (isActive ? "active" : "")}>
-            Erros
-          </NavLink>
-          <NavLink to="/stats" className={({ isActive }) => (isActive ? "active" : "")}>
-            Horas
-          </NavLink>
-          <NavLink to="/guia" className={({ isActive }) => (isActive ? "active" : "")}>
-            Guia
-          </NavLink>
+          {MAIN_NAV.map((n) => (
+            <NavLink key={n.to} to={n.to} className={linkClass}>
+              {n.label}
+            </NavLink>
+          ))}
+          <details key={location.pathname} className={`nav-more ${moreActive ? "active" : ""}`}>
+            <summary>Mais ▾</summary>
+            <div className="nav-more-menu">
+              {MORE_NAV.map((n) => (
+                <NavLink key={n.to} to={n.to} className={linkClass}>
+                  {n.label}
+                </NavLink>
+              ))}
+            </div>
+          </details>
         </nav>
         <div className="app-user">
           {user.examName && <em className="exam-name">{user.examName}</em>}
@@ -61,6 +86,7 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
       </header>
       <main>{children}</main>
       <Cronometro />
+      <Lembretes />
     </div>
   );
 }
@@ -71,86 +97,9 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/painel"
-            element={
-              <PrivateLayout>
-                <Painel />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/revisoes"
-            element={
-              <PrivateLayout>
-                <Revisoes />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/board"
-            element={
-              <PrivateLayout>
-                <Board />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/edital"
-            element={
-              <PrivateLayout>
-                <Edital />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/stats"
-            element={
-              <PrivateLayout>
-                <Stats />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/guia"
-            element={
-              <PrivateLayout>
-                <Guia />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/rotina"
-            element={
-              <PrivateLayout>
-                <Rotina />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/simulados"
-            element={
-              <PrivateLayout>
-                <Simulados />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/erros"
-            element={
-              <PrivateLayout>
-                <Erros />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/plano"
-            element={
-              <PrivateLayout>
-                <Plano />
-              </PrivateLayout>
-            }
-          />
+          {PAGES.map((p) => (
+            <Route key={p.path} path={p.path} element={<PrivateLayout>{p.element}</PrivateLayout>} />
+          ))}
           <Route path="*" element={<Navigate to="/painel" replace />} />
         </Routes>
       </BrowserRouter>

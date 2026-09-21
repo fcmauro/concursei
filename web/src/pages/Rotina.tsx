@@ -3,6 +3,7 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { formatMinutes, localISO } from "../lib/date";
 import { toMin, WEEKDAYS } from "../lib/schedule";
+import { REMINDERS_KEY } from "../components/Lembretes";
 
 type Windows = Record<number, { start: string; end: string }[]>;
 
@@ -15,6 +16,26 @@ export default function Rotina() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [remindersOn, setRemindersOn] = useState(() => localStorage.getItem(REMINDERS_KEY) === "1");
+
+  async function toggleReminders() {
+    if (remindersOn) {
+      localStorage.setItem(REMINDERS_KEY, "0");
+      setRemindersOn(false);
+      return;
+    }
+    if (typeof Notification === "undefined") {
+      alert("Este navegador não suporta notificações.");
+      return;
+    }
+    const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+    if (perm === "granted") {
+      localStorage.setItem(REMINDERS_KEY, "1");
+      setRemindersOn(true);
+    } else {
+      window.alert("Permissão negada. Libere as notificações deste site nas configurações do navegador.");
+    }
+  }
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Trabalho");
@@ -154,6 +175,20 @@ export default function Rotina() {
           </button>
           <button type="button" className="primary" onClick={save}>
             {saved ? "Salvo ✔" : "Salvar horários"}
+          </button>
+        </div>
+      </section>
+
+      <section className="panel">
+        <h3>Lembretes</h3>
+        <p className="hint" style={{ margin: 0 }}>
+          Notificações do navegador: aviso quando a janela de estudo começa e resumo das revisões do dia. Funcionam enquanto o app estiver aberto em alguma aba.
+        </p>
+        <div className="win-footer">
+          <span>{remindersOn ? "Lembretes ativados neste navegador." : "Lembretes desativados."}</span>
+          <span className="spacer" />
+          <button type="button" className="ghost-btn" onClick={toggleReminders}>
+            {remindersOn ? "Desativar lembretes" : "Ativar lembretes"}
           </button>
         </div>
       </section>

@@ -10,11 +10,12 @@ import scheduleRoutes from "./routes/schedule";
 import simuladoRoutes from "./routes/simulados";
 import errorRoutes from "./routes/errors";
 import planRoutes from "./routes/plan";
+import importRoutes from "./routes/import";
 
 const app = express();
 app.set("trust proxy", true);
 app.use(cors(process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN.split(",").map((s) => s.trim()) } : undefined));
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
@@ -27,6 +28,7 @@ app.use("/schedule", scheduleRoutes);
 app.use("/simulados", simuladoRoutes);
 app.use("/errors", errorRoutes);
 app.use("/plan", planRoutes);
+app.use("/import", importRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

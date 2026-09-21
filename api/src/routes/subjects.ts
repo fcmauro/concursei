@@ -94,16 +94,42 @@ router.post("/:id/topics", (req: AuthedRequest, res) => {
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
+// troca o item com o vizinho e regrava sort_order 0..n-1 (up = mais para cima)
+function moveInOrder(table: "topics" | "subjects", ids: string[], id: string, dir: "up" | "down") {
+  const i = ids.indexOf(id);
+  const j = dir === "up" ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= ids.length) return;
+  [ids[i], ids[j]] = [ids[j], ids[i]];
+  const upd = db.prepare(`UPDATE ${table} SET sort_order = ? WHERE id = ?`);
+  ids.forEach((x, k) => upd.run(k, x));
+}
+
 // PATCH /subjects/topics/:topicId -> renomear e/ou marcar como concluído manualmente
 router.patch("/topics/:topicId", (req: AuthedRequest, res) => {
   const topic = db
     .prepare("SELECT t.id FROM topics t JOIN subjects s ON s.id = t.subject_id WHERE t.id = ? AND s.user_id = ?")
     .get(req.params.topicId, req.userId!);
   if (!topic) return res.status(404).json({ error: "Assunto não encontrado" });
-  const { name, done } = req.body || {};
+  const { name, done, subjectId, move } = req.body || {};
+  if (move !== undefined) {
+    if (move !== "up" && move !== "down") return res.status(400).json({ error: "move deve ser up ou down" });
+    const row = db.prepare("SELECT subject_id FROM topics WHERE id = ?").get(req.params.topicId) as { subject_id: string };
+    const ids = (db.prepare("SELECT id FROM topics WHERE subject_id = ? ORDER BY sort_order, created_at").all(row.subject_id) as { id: string }[]).map((r) => r.id);
+    db.transaction(() => moveInOrder("topics", ids, String(req.params.topicId), move))();
+  }
   if (name !== undefined) {
     if (typeof name !== "string" || !name.trim()) return res.status(400).json({ error: "name inválido" });
     db.prepare("UPDATE topics SET name = ? WHERE id = ?").run(name.trim(), req.params.topicId);
+  }
+  if (subjectId !== undefined) {
+    const target = db.prepare("SELECT id FROM subjects WHERE id = ? AND user_id = ?").get(subjectId, req.userId!);
+    if (!target) return res.status(404).json({ error: "Matéria de destino não encontrada" });
+    db.transaction(() => {
+      const max = (db.prepare("SELECT COALESCE(MAX(sort_order), -1) m FROM topics WHERE subject_id = ?").get(subjectId) as any).m;
+      db.prepare("UPDATE topics SET subject_id = ?, sort_order = ? WHERE id = ?").run(subjectId, max + 1, req.params.topicId);
+      db.prepare("UPDATE sessions SET subject_id = ? WHERE topic_id = ?").run(subjectId, req.params.topicId);
+      db.prepare("UPDATE errors SET subject_id = ? WHERE topic_id = ?").run(subjectId, req.params.topicId);
+    })();
   }
   if (done !== undefined) db.prepare("UPDATE topics SET done = ? WHERE id = ?").run(done ? 1 : 0, req.params.topicId);
   res.json({ ok: true });
@@ -126,7 +152,12 @@ router.delete("/topics/:topicId", (req: AuthedRequest, res) => {
 router.patch("/:id", (req: AuthedRequest, res) => {
   const subject = db.prepare("SELECT id FROM subjects WHERE id = ? AND user_id = ?").get(req.params.id, req.userId!);
   if (!subject) return res.status(404).json({ error: "Matéria não encontrada" });
-  const { name, weight, color } = req.body || {};
+  const { name, weight, color, move } = req.body || {};
+  if (move !== undefined) {
+    if (move !== "up" && move !== "down") return res.status(400).json({ error: "move deve ser up ou down" });
+    const ids = (db.prepare("SELECT id FROM subjects WHERE user_id = ? ORDER BY sort_order, created_at").all(req.userId!) as { id: string }[]).map((r) => r.id);
+    db.transaction(() => moveInOrder("subjects", ids, String(req.params.id), move))();
+  }
   if (name !== undefined) {
     if (typeof name !== "string" || !name.trim()) return res.status(400).json({ error: "name inválido" });
     db.prepare("UPDATE subjects SET name = ? WHERE id = ?").run(name.trim(), req.params.id);

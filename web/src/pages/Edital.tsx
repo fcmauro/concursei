@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import SubjectModal from "../components/SubjectModal";
+import MoveTopicModal from "../components/MoveTopicModal";
 
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "—";
@@ -10,6 +11,7 @@ export default function Edital() {
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<any | null>(null);
+  const [moving, setMoving] = useState<{ topic: any; subjectId: string } | null>(null);
 
   const [newName, setNewName] = useState("");
   const [newWeight, setNewWeight] = useState(1);
@@ -42,6 +44,16 @@ export default function Edital() {
     if (!name) return;
     await api.createTopic(subjectId, name);
     setTopicDrafts((d) => ({ ...d, [subjectId]: "" }));
+    await load();
+  }
+
+  async function reorderTopic(t: any, dir: "up" | "down") {
+    await api.updateTopic(t.id, { move: dir });
+    await load();
+  }
+
+  async function reorderSubject(s: any, dir: "up" | "down") {
+    await api.updateSubject(s.id, { move: dir });
     await load();
   }
 
@@ -106,7 +118,7 @@ export default function Edital() {
         <p className="loading">Nenhuma matéria ainda. Cadastre as matérias do seu edital acima e depois os assuntos de cada uma.</p>
       )}
 
-      {subjects.map((s) => {
+      {subjects.map((s, si) => {
         const isCollapsed = collapsed[s.id];
         const totalQ = s.topics.reduce((a: number, t: any) => a + t.questions, 0);
         const totalC = s.topics.reduce((a: number, t: any) => a + t.correct, 0);
@@ -122,6 +134,12 @@ export default function Edital() {
                 <div className="progress-fill" style={{ width: `${Math.round(s.progress * 100)}%`, background: s.color }} />
               </div>
               <span className="progress-label">{Math.round(s.progress * 100)}%</span>
+              <button className="icon-btn" disabled={si === 0} onClick={() => reorderSubject(s, "up")} aria-label="Subir matéria" title="Subir matéria">
+                ▲
+              </button>
+              <button className="icon-btn" disabled={si === subjects.length - 1} onClick={() => reorderSubject(s, "down")} aria-label="Descer matéria" title="Descer matéria">
+                ▼
+              </button>
               <button className="icon-btn" onClick={() => setEditing(s)} aria-label="Editar matéria" title="Editar matéria">
                 ✎
               </button>
@@ -136,17 +154,18 @@ export default function Edital() {
                     <thead>
                       <tr>
                         <th style={{ width: 44 }}>✔</th>
+                        <th style={{ width: 36 }}>#</th>
                         <th>Assunto</th>
                         <th>Questões</th>
                         <th>Acertos</th>
                         <th>Erros</th>
                         <th>Desempenho</th>
                         <th>Último estudo</th>
-                        <th style={{ width: 84 }} />
+                        <th style={{ width: 190 }} />
                       </tr>
                     </thead>
                     <tbody>
-                      {s.topics.map((t: any) => {
+                      {s.topics.map((t: any, ti: number) => {
                         const p = t.desempenho === null ? null : Math.round(t.desempenho * 100);
                         return (
                           <tr key={t.id} className={t.mastered ? "mastered" : ""}>
@@ -160,6 +179,7 @@ export default function Edital() {
                                 aria-label={`Concluído: ${t.name}`}
                               />
                             </td>
+                            <td className="num">{ti + 1}</td>
                             <td>{t.name}</td>
                             <td>{t.questions}</td>
                             <td className="ok">{t.correct}</td>
@@ -167,8 +187,17 @@ export default function Edital() {
                             <td>{p === null ? "—" : <span className={`perf ${p >= 80 ? "good" : p >= 60 ? "mid" : "low"}`}>{p}%</span>}</td>
                             <td>{fmtDate(t.lastStudied)}</td>
                             <td>
+                              <button className="icon-btn" disabled={ti === 0} onClick={() => reorderTopic(t, "up")} aria-label="Subir assunto" title="Subir">
+                                ▲
+                              </button>
+                              <button className="icon-btn" disabled={ti === s.topics.length - 1} onClick={() => reorderTopic(t, "down")} aria-label="Descer assunto" title="Descer">
+                                ▼
+                              </button>
                               <button className="icon-btn" onClick={() => renameTopic(t)} aria-label="Renomear assunto" title="Renomear">
                                 ✎
+                              </button>
+                              <button className="icon-btn" onClick={() => setMoving({ topic: t, subjectId: s.id })} aria-label="Mover para outra matéria" title="Mover para outra matéria">
+                                ⇄
                               </button>
                               <button className="icon-btn danger" onClick={() => removeTopic(t)} aria-label="Apagar assunto" title="Apagar">
                                 ✕
@@ -178,6 +207,7 @@ export default function Edital() {
                         );
                       })}
                       <tr className="total-row">
+                        <td />
                         <td />
                         <td>Total da matéria</td>
                         <td>{totalQ}</td>
@@ -206,6 +236,25 @@ export default function Edital() {
           </div>
         );
       })}
+
+      {moving && (
+        <MoveTopicModal
+          topicName={moving.topic.name}
+          currentSubjectId={moving.subjectId}
+          subjects={subjects}
+          onClose={() => setMoving(null)}
+          onMove={async (subjectId) => {
+            try {
+              await api.updateTopic(moving.topic.id, { subjectId });
+            } catch (e: any) {
+              window.alert(`Não foi possível mover: ${e.message}`);
+              return;
+            }
+            setMoving(null);
+            await load();
+          }}
+        />
+      )}
 
       {editing && (
         <SubjectModal
