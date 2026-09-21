@@ -33,7 +33,7 @@ export default function Login() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Cronograma de Estudos</h1>
+        <h1>Concursei</h1>
         <p className="subtitle">Concurso MPMS — Analista TI / Desenvolvimento de Sistemas</p>
 
         <div className="tabs">

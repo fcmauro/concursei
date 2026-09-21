@@ -12,7 +12,7 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="app-title">Cronograma de Estudos</div>
+        <div className="app-title">Concursei</div>
         <nav>
           <NavLink to="/board" className={({ isActive }) => (isActive ? "active" : "")}>
             Diário
