@@ -15,6 +15,12 @@ async function request(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (res.status === 204) return null;
   const data = await res.json().catch(() => null);
+  if (res.status === 401 && token && !path.startsWith("/auth/")) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    if (window.location.pathname !== "/login") window.location.assign("/login");
+    throw new Error("Sessão expirada. Entre novamente.");
+  }
   if (!res.ok) {
     throw new Error(data?.error || `Erro ${res.status}`);
   }
@@ -22,10 +28,43 @@ async function request(path: string, options: RequestInit = {}) {
 }
 
 export const api = {
-  register: (email: string, password: string, name: string) =>
-    request("/auth/register", { method: "POST", body: JSON.stringify({ email, password, name }) }),
+  register: (email: string, password: string, name: string, examName: string, template: string) =>
+    request("/auth/register", { method: "POST", body: JSON.stringify({ email, password, name, examName, template }) }),
   login: (email: string, password: string) =>
     request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+
+  getAvailability: () => request("/schedule/availability"),
+  saveAvailability: (windows: { weekday: number; start: string; end: string }[]) =>
+    request("/schedule/availability", { method: "PUT", body: JSON.stringify({ windows }) }),
+  getEvents: (from: string, to: string) => request(`/schedule/events?from=${from}&to=${to}`),
+  getAllEvents: () => request("/schedule/events"),
+  createEvent: (payload: Record<string, unknown>) => request("/schedule/events", { method: "POST", body: JSON.stringify(payload) }),
+  deleteEvent: (id: string) => request(`/schedule/events/${id}`, { method: "DELETE" }),
+
+  updateSubject: (id: string, payload: Record<string, unknown>) =>
+    request(`/subjects/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteSubject: (id: string) => request(`/subjects/${id}`, { method: "DELETE" }),
+  updateTopic: (id: string, payload: Record<string, unknown>) =>
+    request(`/subjects/topics/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteTopic: (id: string) => request(`/subjects/topics/${id}`, { method: "DELETE" }),
+
+  getSimulados: () => request("/simulados"),
+  createSimulado: (payload: Record<string, unknown>) => request("/simulados", { method: "POST", body: JSON.stringify(payload) }),
+  deleteSimulado: (id: string) => request(`/simulados/${id}`, { method: "DELETE" }),
+
+  getErrors: () => request("/errors"),
+  createError: (payload: Record<string, unknown>) => request("/errors", { method: "POST", body: JSON.stringify(payload) }),
+  patchError: (id: string, payload: Record<string, unknown>) => request(`/errors/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteError: (id: string) => request(`/errors/${id}`, { method: "DELETE" }),
+
+  importData: (payload: Record<string, unknown>) => request("/import", { method: "POST", body: JSON.stringify(payload) }),
+  getDoneSessions: () => request("/sessions?status=DONE"),
+  generatePlan: (payload: Record<string, unknown>) => request("/plan", { method: "POST", body: JSON.stringify(payload) }),
+
+  getMe: () => request("/me"),
+  updateMe: (payload: Record<string, unknown>) => request("/me", { method: "PATCH", body: JSON.stringify(payload) }),
+  getDashboard: (today: string, from: string, to: string) => request(`/stats/dashboard?today=${today}&from=${from}&to=${to}`),
+  getReviews: () => request("/sessions?kind=review"),
 
   getSubjects: () => request("/subjects"),
   createSubject: (name: string, weight = 1, color = "#D9E1F2") =>
@@ -34,7 +73,8 @@ export const api = {
     request(`/subjects/${subjectId}/topics`, { method: "POST", body: JSON.stringify({ name }) }),
 
   getSessions: (from: string, to: string) => request(`/sessions?from=${from}&to=${to}`),
-  createSession: (payload: { subjectId: string; topicId?: string; date: string; type?: string; minutes?: number }) =>
+  getBacklog: () => request("/sessions?status=POSTPONED"),
+  createSession: (payload: { subjectId: string; topicId?: string; date: string; type?: string; minutes?: number; note?: string }) =>
     request("/sessions", { method: "POST", body: JSON.stringify(payload) }),
   patchSession: (id: string, payload: Record<string, unknown>) =>
     request(`/sessions/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),

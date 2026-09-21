@@ -20,6 +20,16 @@ export default function Stats() {
   return (
     <div className="stats-page">
       <h2>Distribuição de horas por matéria</h2>
+      <div className="summary-cards">
+        <div className="summary-card brand">
+          <span>Previstas por semana</span>
+          <strong>{totalHoursWeek.toFixed(1)}h</strong>
+        </div>
+        <div className="summary-card">
+          <span>Lançadas no diário</span>
+          <strong>{totalLogged.toFixed(1)}h</strong>
+        </div>
+      </div>
       <table className="edital-table">
         <thead>
           <tr>

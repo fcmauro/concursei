@@ -4,7 +4,9 @@ services:
     container_name: estudo-api
     restart: unless-stopped
     environment:
-      - JWT_SECRET=troque-este-segredo-em-producao
+      - JWT_SECRET=${JWT_SECRET:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-}
+      - ALLOW_REGISTRATION=${ALLOW_REGISTRATION:-true}
       - PORT=4000
       - DATABASE_PATH=/app/data/data.db
     volumes:
@@ -16,7 +18,7 @@ services:
     build:
       context: ./web
       args:
-        VITE_API_URL: http://localhost:4000
+        VITE_API_URL: /api
     container_name: estudo-web
     restart: unless-stopped
     depends_on:

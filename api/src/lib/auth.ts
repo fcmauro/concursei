@@ -1,8 +1,24 @@
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+function resolveSecret() {
+  const fromEnv = process.env.JWT_SECRET;
+  if (fromEnv && !["dev-secret", "troque-este-segredo-em-producao"].includes(fromEnv)) return fromEnv;
+  const file = path.join(path.dirname(process.env.DATABASE_PATH || path.join(__dirname, "..", "..", "data.db")), ".jwt-secret");
+  try {
+    return fs.readFileSync(file, "utf-8").trim();
+  } catch {
+    const generated = crypto.randomBytes(48).toString("hex");
+    fs.writeFileSync(file, generated, { mode: 0o600 });
+    return generated;
+  }
+}
+
+const JWT_SECRET = resolveSecret();
 
 export function hashPassword(pw: string) {
   return bcrypt.hashSync(pw, 10);

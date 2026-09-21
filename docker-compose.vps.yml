@@ -1,0 +1,33 @@
+# Deploy em VPS (funciona em x86 e ARM). Sem portas publicadas: o acesso é só por um túnel Cloudflare.
+# Combine com UM destes arquivos (o scripts/deploy.sh escolhe pelo .env):
+#   docker-compose.tunnel.yml         -> sobe um túnel próprio (TUNNEL_TOKEN=...)
+#   docker-compose.shared-tunnel.yml  -> reaproveita um túnel que já roda (TUNNEL_NETWORK=<rede do túnel>)
+services:
+  api:
+    build: ./api
+    container_name: estudo-api
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-}
+      - ALLOW_REGISTRATION=${ALLOW_REGISTRATION:-false}
+      - DATABASE_PATH=/app/data/data.db
+      - PORT=4000
+    volumes:
+      - estudo-data:/app/data
+    mem_limit: 256m
+
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: /api
+    container_name: estudo-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 64m
+
+volumes:
+  estudo-data:
