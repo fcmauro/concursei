@@ -6,9 +6,24 @@ import { DEFAULT_SUBJECTS } from "../lib/seedContent";
 
 const MPMS_EXAM_NAME = "MPMS — Analista TI / Desenvolvimento de Sistemas";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const attempts = new Map<string, { count: number; resetAt: number }>();
+function rateLimited(key: string, max = 10, windowMs = 15 * 60 * 1000) {
+  const now = Date.now();
+  const entry = attempts.get(key);
+  if (!entry || entry.resetAt < now) {
+    attempts.set(key, { count: 1, resetAt: now + windowMs });
+    return false;
+  }
+  entry.count++;
+  return entry.count > max;
+}
+
 const router = Router();
 
 router.post("/register", (req, res) => {
+  if (rateLimited(`reg:${req.ip}`, 20)) return res.status(429).json({ error: "Muitas tentativas. Aguarde alguns minutos." });
   const { email, password, name, examName, template } = req.body || {};
   if (!email || !password || !name) {
     return res.status(400).json({ error: "email, password e name são obrigatórios" });
@@ -18,6 +33,10 @@ router.post("/register", (req, res) => {
     return res.status(409).json({ error: "E-mail já cadastrado" });
   }
 
+  if (typeof email !== "string" || !EMAIL_RE.test(email)) return res.status(400).json({ error: "E-mail inválido" });
+  if (typeof password !== "string" || password.length < 8) {
+    return res.status(400).json({ error: "A senha precisa ter pelo menos 8 caracteres" });
+  }
   const useMpmsTemplate = template === "mpms405";
   const finalExamName: string | null =
     (typeof examName === "string" && examName.trim()) || (useMpmsTemplate ? MPMS_EXAM_NAME : null);
@@ -50,6 +69,9 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
+  if (rateLimited(`login:${req.ip}:${String(req.body?.email || "").toLowerCase()}`)) {
+    return res.status(429).json({ error: "Muitas tentativas. Aguarde alguns minutos." });
+  }
   const { email, password } = req.body || {};
   if (!email || !password) {
     return res.status(400).json({ error: "email e password são obrigatórios" });

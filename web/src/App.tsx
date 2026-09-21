@@ -5,6 +5,9 @@ import Board from "./pages/Board";
 import Edital from "./pages/Edital";
 import Stats from "./pages/Stats";
 import Guia from "./pages/Guia";
+import Painel from "./pages/Painel";
+import Revisoes from "./pages/Revisoes";
+import Cronometro from "./components/Cronometro";
 import "./app.css";
 
 function PrivateLayout({ children }: { children: React.ReactNode }) {
@@ -15,8 +18,14 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
       <header className="app-header">
         <div className="app-title">Concursei</div>
         <nav>
+          <NavLink to="/painel" className={({ isActive }) => (isActive ? "active" : "")}>
+            Painel
+          </NavLink>
           <NavLink to="/board" className={({ isActive }) => (isActive ? "active" : "")}>
             Diário
+          </NavLink>
+          <NavLink to="/revisoes" className={({ isActive }) => (isActive ? "active" : "")}>
+            Revisões
           </NavLink>
           <NavLink to="/edital" className={({ isActive }) => (isActive ? "active" : "")}>
             Edital
@@ -35,6 +44,7 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main>{children}</main>
+      <Cronometro />
     </div>
   );
 }
@@ -45,6 +55,22 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/painel"
+            element={
+              <PrivateLayout>
+                <Painel />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/revisoes"
+            element={
+              <PrivateLayout>
+                <Revisoes />
+              </PrivateLayout>
+            }
+          />
           <Route
             path="/board"
             element={
@@ -77,7 +103,7 @@ export default function App() {
               </PrivateLayout>
             }
           />
-          <Route path="*" element={<Navigate to="/board" replace />} />
+          <Route path="*" element={<Navigate to="/painel" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

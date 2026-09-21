@@ -1,6 +1,6 @@
 FROM node:20-slim AS build
 WORKDIR /app
-ARG VITE_API_URL=http://localhost:4000
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 COPY package*.json ./
 RUN npm install

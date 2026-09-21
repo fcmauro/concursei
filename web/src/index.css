@@ -29,6 +29,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 h1, h2, h3, strong, .app-title { font-family: 'Space Grotesk', sans-serif; }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #2b3550; border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: #d9ccb8; border-radius: 99px; }
 ::-webkit-scrollbar-track { background: transparent; }
 @media (max-width: 760px) { body { font-size: 14px; } }

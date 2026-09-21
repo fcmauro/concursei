@@ -5,9 +5,11 @@ import authRoutes from "./routes/auth";
 import subjectRoutes from "./routes/subjects";
 import sessionRoutes from "./routes/sessions";
 import statsRoutes from "./routes/stats";
+import meRoutes from "./routes/me";
 
 const app = express();
-app.use(cors());
+app.set("trust proxy", true);
+app.use(cors(process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN.split(",").map((s) => s.trim()) } : undefined));
 app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
@@ -16,6 +18,7 @@ app.use("/auth", authRoutes);
 app.use("/subjects", subjectRoutes);
 app.use("/sessions", sessionRoutes);
 app.use("/stats", statsRoutes);
+app.use("/me", meRoutes);
 
 const PORT = Number(process.env.PORT || 4000);
 app.listen(PORT, () => {

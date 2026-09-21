@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { formatMinutes } from "../lib/date";
 
 export interface SessionRow {
   id: string;
@@ -15,9 +15,17 @@ export interface SessionRow {
   minutes: number;
   questions: number;
   correct: number;
+  note: string | null;
 }
 
-const TYPE_LABEL: Record<string, string> = {
+export interface SessionPatch {
+  minutes: number;
+  questions: number;
+  correct: number;
+  note: string;
+}
+
+export const TYPE_LABEL: Record<string, string> = {
   ESTUDO: "Estudo",
   SIMULADO: "Simulado",
   REVISAO_24H: "Revisão 24h",
@@ -26,85 +34,44 @@ const TYPE_LABEL: Record<string, string> = {
   REVISAO_30D: "Revisão 30 dias",
 };
 
-export default function SessionCard({
-  session,
-  onDone,
-  onPostpone,
-  onDelete,
-}: {
-  session: SessionRow;
-  onDone: (id: string, questions: number, correct: number) => void;
-  onPostpone: (id: string) => void;
-  onDelete: (id: string) => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const [questions, setQuestions] = useState(session.questions || 0);
-  const [correct, setCorrect] = useState(session.correct || 0);
+export default function SessionCard({ session, onOpen }: { session: SessionRow; onOpen: (s: SessionRow) => void }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: session.id });
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: session.id,
-  });
-
+  const color = session.subject_color || "#94a3b8";
+  const isDone = session.status === "DONE";
+  const isPostponed = session.status === "POSTPONED";
   const style = {
     transform: CSS.Translate.toString(transform),
-    borderLeft: `5px solid ${session.subject_color}`,
-    opacity: isDragging ? 0.4 : 1,
+    borderLeftColor: color,
+    opacity: isDragging ? 0.45 : isPostponed ? 0.6 : 1,
+    zIndex: isDragging ? 5 : undefined,
   };
 
-  const statusClass =
-    session.status === "DONE" ? "status-done" : session.status === "POSTPONED" ? "status-postponed" : "status-todo";
-
   return (
-    <div ref={setNodeRef} style={style} className={`session-card ${statusClass}`}>
-      <div className="card-drag" {...listeners} {...attributes}>
-        <div className="card-type">{TYPE_LABEL[session.type] || session.type}</div>
-        <div className="card-subject">{session.subject_name}</div>
-        {session.topic_name && <div className="card-topic">{session.topic_name}</div>}
-      </div>
-
-      {session.status === "DONE" && (
-        <div className="card-result">
-          ✔ {session.correct}/{session.questions} questões
-        </div>
-      )}
-
-      <div className="card-actions">
-        {session.status !== "DONE" && (
-          <button onClick={() => setExpanded((v) => !v)} className="mini-btn done">
-            Concluir
-          </button>
-        )}
-        {session.status === "TODO" && (
-          <button onClick={() => onPostpone(session.id)} className="mini-btn postpone">
-            Adiar
-          </button>
-        )}
-        <button onClick={() => onDelete(session.id)} className="mini-btn delete">
-          ✕
-        </button>
-      </div>
-
-      {expanded && (
-        <div className="card-form">
-          <label>
-            Questões
-            <input type="number" min={0} value={questions} onChange={(e) => setQuestions(Number(e.target.value))} />
-          </label>
-          <label>
-            Acertos
-            <input type="number" min={0} value={correct} onChange={(e) => setCorrect(Number(e.target.value))} />
-          </label>
-          <button
-            className="mini-btn confirm"
-            onClick={() => {
-              onDone(session.id, questions, correct);
-              setExpanded(false);
-            }}
-          >
-            Salvar e concluir
-          </button>
-        </div>
-      )}
+    <div ref={setNodeRef} style={style} className={`session-card ${isDone ? "status-done" : ""}`}>
+      <button type="button" className="card-main" onClick={() => onOpen(session)} title="Clique para registrar tempo, questões e concluir">
+        <span className="type-pill" style={{ color, background: `${color}22` }}>
+          {TYPE_LABEL[session.type] || session.type}
+        </span>
+        <span className="card-subject">{session.subject_name}</span>
+        {session.topic_name && <span className="card-topic">{session.topic_name}</span>}
+        <span className="card-meta">
+          {isDone ? (
+            <>
+              ✔ {formatMinutes(session.minutes)}
+              {session.questions > 0 && ` · ${session.correct}/${session.questions}`}
+            </>
+          ) : (
+            <>
+              ⏱ {formatMinutes(session.minutes)}
+              {isPostponed && ` · era ${new Date(session.date + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`}
+            </>
+          )}
+        </span>
+      </button>
+      <button className="drag-handle" aria-label="Arrastar para outro dia" title="Arraste para outro dia" {...listeners} {...attributes}>
+        ⠿
+      </button>
     </div>
   );
 }

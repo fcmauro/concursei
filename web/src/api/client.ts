@@ -27,6 +27,11 @@ export const api = {
   login: (email: string, password: string) =>
     request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
 
+  getMe: () => request("/me"),
+  updateMe: (payload: Record<string, unknown>) => request("/me", { method: "PATCH", body: JSON.stringify(payload) }),
+  getDashboard: (today: string, from: string, to: string) => request(`/stats/dashboard?today=${today}&from=${from}&to=${to}`),
+  getReviews: () => request("/sessions?kind=review"),
+
   getSubjects: () => request("/subjects"),
   createSubject: (name: string, weight = 1, color = "#D9E1F2") =>
     request("/subjects", { method: "POST", body: JSON.stringify({ name, weight, color }) }),
@@ -34,7 +39,8 @@ export const api = {
     request(`/subjects/${subjectId}/topics`, { method: "POST", body: JSON.stringify({ name }) }),
 
   getSessions: (from: string, to: string) => request(`/sessions?from=${from}&to=${to}`),
-  createSession: (payload: { subjectId: string; topicId?: string; date: string; type?: string; minutes?: number }) =>
+  getBacklog: () => request("/sessions?status=POSTPONED"),
+  createSession: (payload: { subjectId: string; topicId?: string; date: string; type?: string; minutes?: number; note?: string }) =>
     request("/sessions", { method: "POST", body: JSON.stringify(payload) }),
   patchSession: (id: string, payload: Record<string, unknown>) =>
     request(`/sessions/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),

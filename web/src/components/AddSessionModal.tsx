@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Subject {
   id: string;
@@ -16,15 +17,16 @@ export default function AddSessionModal({
   date: string;
   subjects: Subject[];
   onClose: () => void;
-  onCreate: (subjectId: string, topicId: string | undefined, type: string) => void;
+  onCreate: (subjectId: string, topicId: string | undefined, type: string, minutes: number) => void;
 }) {
   const [subjectId, setSubjectId] = useState(subjects[0]?.id || "");
   const [topicId, setTopicId] = useState("");
   const [type, setType] = useState("ESTUDO");
+  const [minutes, setMinutes] = useState(120);
 
   const subject = subjects.find((s) => s.id === subjectId);
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h3>Adicionar em {new Date(date + "T00:00:00").toLocaleDateString("pt-BR")}</h3>
@@ -63,12 +65,18 @@ export default function AddSessionModal({
             <option value="SIMULADO">Simulado</option>
           </select>
         </label>
+        <label>
+          Tempo planejado (min)
+          <input type="number" min={5} step={5} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} />
+        </label>
+        {subjects.length === 0 && <p className="hint">Cadastre matérias na aba Edital antes de planejar sessões.</p>}
         <div className="modal-actions">
           <button onClick={onClose}>Cancelar</button>
           <button
             className="primary"
+            disabled={!subjectId}
             onClick={() => {
-              onCreate(subjectId, topicId || undefined, type);
+              onCreate(subjectId, topicId || undefined, type, minutes);
               onClose();
             }}
           >
@@ -76,6 +84,7 @@ export default function AddSessionModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

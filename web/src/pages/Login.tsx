@@ -24,7 +24,7 @@ export default function Login() {
       } else {
         await register(email, password, name, examName, template);
       }
-      navigate("/board");
+      navigate("/painel");
     } catch (err: any) {
       setError(err.message);
     } finally {
