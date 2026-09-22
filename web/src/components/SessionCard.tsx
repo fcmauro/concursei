@@ -23,6 +23,15 @@ export interface SessionPatch {
   questions: number;
   correct: number;
   note: string;
+  subjectId: string;
+  topicId: string | null;
+}
+
+export interface SubjectOption {
+  id: string;
+  name: string;
+  color: string;
+  topics: { id: string; name: string }[];
 }
 
 export const TYPE_LABEL: Record<string, string> = {

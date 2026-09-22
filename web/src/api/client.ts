@@ -67,6 +67,8 @@ export const api = {
   wipeCalendar: () => request("/calendar/events", { method: "DELETE" }),
   deleteCalendar: (removeEvents: boolean) => request(`/calendar?removeEvents=${removeEvents ? 1 : 0}`, { method: "DELETE" }),
 
+  getAdminUsers: () => request("/admin/users"),
+
   getMe: () => request("/me"),
   updateMe: (payload: Record<string, unknown>) => request("/me", { method: "PATCH", body: JSON.stringify(payload) }),
   getDashboard: (today: string, from: string, to: string) => request(`/stats/dashboard?today=${today}&from=${from}&to=${to}`),

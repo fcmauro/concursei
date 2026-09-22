@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { api } from "../api/client";
 
@@ -7,6 +7,7 @@ interface User {
   email: string;
   name: string;
   examName?: string | null;
+  isAdmin?: boolean;
 }
 
 interface AuthContextValue {
@@ -24,6 +25,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const raw = localStorage.getItem("user");
     return raw ? JSON.parse(raw) : null;
   });
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) return;
+    api
+      .getMe()
+      .then((me) => updateUser({ examName: me.examName, isAdmin: me.isAdmin }))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function persist(token: string, user: User) {
     localStorage.setItem("token", token);

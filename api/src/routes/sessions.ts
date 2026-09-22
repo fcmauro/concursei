@@ -114,11 +114,27 @@ router.patch("/:id", (req: AuthedRequest, res) => {
 
   const fields: string[] = [];
   const params: any[] = [];
-  const { date, status, minutes, questions, correct, note } = req.body || {};
+  const { date, status, minutes, questions, correct, note, subjectId, topicId } = req.body || {};
 
   if (date !== undefined) {
     fields.push("date = ?");
     params.push(date);
+  }
+  let effectiveSubjectId = existing.subject_id;
+  if (subjectId !== undefined) {
+    const subject = db.prepare("SELECT id FROM subjects WHERE id = ? AND user_id = ?").get(subjectId, req.userId!);
+    if (!subject) return res.status(404).json({ error: "Matéria não encontrada" });
+    effectiveSubjectId = subjectId;
+    fields.push("subject_id = ?");
+    params.push(subjectId);
+  }
+  if (topicId !== undefined) {
+    if (topicId) {
+      const topic = db.prepare("SELECT id FROM topics WHERE id = ? AND subject_id = ?").get(topicId, effectiveSubjectId);
+      if (!topic) return res.status(404).json({ error: "Assunto não encontrado nessa matéria" });
+    }
+    fields.push("topic_id = ?");
+    params.push(topicId || null);
   }
   if (status !== undefined) {
     if (!VALID_STATUS.includes(status)) return res.status(400).json({ error: "status inválido" });

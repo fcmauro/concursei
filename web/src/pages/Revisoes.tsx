@@ -19,6 +19,7 @@ function dayLabel(date: string, today: string) {
 
 export default function Revisoes() {
   const [all, setAll] = useState<SessionRow[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [tab, setTab] = useState<Tab>("programadas");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +27,9 @@ export default function Revisoes() {
   const today = localISO(new Date());
 
   const load = useCallback(async () => {
-    setAll(await api.getReviews());
+    const [reviews, subs] = await Promise.all([api.getReviews(), api.getSubjects()]);
+    setAll(reviews);
+    setSubjects(subs);
     setLoading(false);
   }, []);
 
@@ -122,6 +125,7 @@ export default function Revisoes() {
       {selected && (
         <SessionModal
           session={selected}
+          subjects={subjects}
           onClose={() => setSelectedId(null)}
           onDone={(id: string, d: SessionPatch) => update(id, { status: "DONE", ...d })}
           onSave={(id: string, d: SessionPatch) => update(id, { ...d })}

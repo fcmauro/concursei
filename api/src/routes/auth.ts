@@ -22,6 +22,8 @@ function rateLimited(key: string, max = 10, windowMs = 15 * 60 * 1000) {
 
 const registrationOpen = () => process.env.ALLOW_REGISTRATION !== "false";
 
+import { isAdminEmail } from "../lib/admin";
+
 const router = Router();
 
 router.get("/config", (_req, res) => res.json({ registration: registrationOpen() }));
@@ -70,7 +72,7 @@ router.post("/register", (req, res) => {
   if (useMpmsTemplate) seedTx();
 
   const token = signToken(userId);
-  res.status(201).json({ token, user: { id: userId, email, name, examName: finalExamName } });
+  res.status(201).json({ token, user: { id: userId, email, name, examName: finalExamName, isAdmin: isAdminEmail(email) } });
 });
 
 router.post("/login", (req, res) => {
@@ -88,7 +90,7 @@ router.post("/login", (req, res) => {
     return res.status(401).json({ error: "Credenciais inválidas" });
   }
   const token = signToken(user.id);
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, examName: user.exam_name } });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, examName: user.exam_name, isAdmin: isAdminEmail(user.email) } });
 });
 
 export default router;

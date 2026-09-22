@@ -157,6 +157,7 @@ export default function Board() {
       {selected && (
         <SessionModal
           session={selected}
+          subjects={subjects}
           onClose={() => setSelectedId(null)}
           onDone={handleDone}
           onSave={handleSave}

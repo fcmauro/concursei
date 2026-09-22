@@ -6,6 +6,7 @@ import { formatMinutes } from "../lib/date";
 
 export default function SessionModal({
   session,
+  subjects,
   onClose,
   onDone,
   onSave,
@@ -15,6 +16,7 @@ export default function SessionModal({
   onDelete,
 }: {
   session: SessionRow;
+  subjects: import("./SessionCard").SubjectOption[];
   onClose: () => void;
   onDone: (id: string, data: SessionPatch) => void;
   onSave: (id: string, data: SessionPatch) => void;
@@ -23,6 +25,8 @@ export default function SessionModal({
   onMove: (id: string, date: string) => void;
   onDelete: (id: string) => void;
 }) {
+  const [subjectId, setSubjectId] = useState(session.subject_id);
+  const [topicId, setTopicId] = useState(session.topic_id || "");
   const [minutes, setMinutes] = useState(session.minutes || 0);
   const [questions, setQuestions] = useState(session.questions || 0);
   const [correct, setCorrect] = useState(session.correct || 0);
@@ -39,11 +43,15 @@ export default function SessionModal({
   const isDone = session.status === "DONE";
   const pct = questions > 0 ? Math.round((Math.min(correct, questions) / questions) * 100) : null;
 
+  const currentSubject = subjects.find((s) => s.id === subjectId);
+
   const payload = (): SessionPatch => ({
     minutes: Math.max(0, minutes),
     questions: Math.max(0, questions),
     correct: Math.min(Math.max(0, correct), Math.max(0, questions)),
     note,
+    subjectId,
+    topicId: topicId || null,
   });
 
   return createPortal(
@@ -59,6 +67,37 @@ export default function SessionModal({
             {new Date(session.date + "T00:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
             {isDone ? " · concluído" : session.status === "POSTPONED" ? " · adiado" : ""}
           </small>
+        </div>
+
+        <div className="sm-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          <div className="sm-field">
+            <label htmlFor="sm-subj">Matéria estudada</label>
+            <select
+              id="sm-subj"
+              value={subjectId}
+              onChange={(e) => {
+                setSubjectId(e.target.value);
+                setTopicId("");
+              }}
+            >
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="sm-field">
+            <label htmlFor="sm-topic">Assunto estudado</label>
+            <select id="sm-topic" value={topicId} onChange={(e) => setTopicId(e.target.value)}>
+              <option value="">(sem assunto específico)</option>
+              {currentSubject?.topics.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="sm-field">

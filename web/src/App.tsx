@@ -14,6 +14,7 @@ import Erros from "./pages/Erros";
 import Plano from "./pages/Plano";
 import Historico from "./pages/Historico";
 import Importar from "./pages/Importar";
+import Admin from "./pages/Admin";
 import Cronometro from "./components/Cronometro";
 import Lembretes from "./components/Lembretes";
 import "./app.css";
@@ -48,13 +49,14 @@ const PAGES: { path: string; element: React.ReactNode }[] = [
   { path: "/historico", element: <Historico /> },
   { path: "/stats", element: <Stats /> },
   { path: "/importar", element: <Importar /> },
+  { path: "/admin", element: <Admin /> },
   { path: "/guia", element: <Guia /> },
 ];
 
-function NavMore({ pathname }: { pathname: string }) {
+function NavMore({ pathname, items }: { pathname: string; items: { to: string; label: string }[] }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const active = MORE_NAV.some((m) => m.to === pathname);
+  const active = items.some((m) => m.to === pathname);
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -79,7 +81,7 @@ function NavMore({ pathname }: { pathname: string }) {
       </button>
       {open && (
         <div className="nav-more-menu" role="menu">
-          {MORE_NAV.map((n) => (
+          {items.map((n) => (
             <NavLink key={n.to} to={n.to} role="menuitem" className={linkClass}>
               {n.label}
             </NavLink>
@@ -106,7 +108,10 @@ function PrivateLayout({ children }: { children: React.ReactNode }) {
               {n.label}
             </NavLink>
           ))}
-          <NavMore pathname={location.pathname} />
+          <NavMore
+            pathname={location.pathname}
+            items={user?.isAdmin ? [...MORE_NAV, { to: "/admin", label: "Administração" }] : MORE_NAV}
+          />
         </nav>
         <div className="app-user">
           {user.examName && <em className="exam-name">{user.examName}</em>}

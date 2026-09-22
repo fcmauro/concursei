@@ -2,6 +2,8 @@ import { Router } from "express";
 import { db } from "../db";
 import { AuthedRequest, requireAuth } from "../lib/auth";
 
+import { isAdminEmail } from "../lib/admin";
+
 const router = Router();
 router.use(requireAuth);
 
@@ -20,6 +22,7 @@ function readUser(id: string) {
     prepDate: u.prep_date,
     goalHoursWeek: u.goal_hours_week,
     goalQuestionsWeek: u.goal_questions_week,
+    isAdmin: isAdminEmail(u.email),
   };
 }
 
